@@ -5,19 +5,19 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild ./src/index.jsx --bundle --outfile=./dist/static/bundles/app.js --minify --sourcemap --target=es2015",
+    "build": "esbuild ./src/index.jsx --bundle --outfile=./api/static/bundles/app.js --minify --sourcemap --target=es2015",
     "serve": "sudo ./docker/deploy.sh",
     "restart": "sudo docker container restart empadataquery",
     "logs": "sudo docker container logs -f empadataquery",
     "clearlogs": "sudo truncate -s 0 $(docker inspect --format=\"{{.LogPath}}\" empadataquery)",
     "ipython": "sudo docker container exec -it empadataquery ipython",
-    "dev": "esbuild ./src/index.jsx --bundle --outfile=./dist/static/bundle.js --sourcemap --target=es2015 --watch"
+    "dev": "esbuild ./src/index.jsx --bundle --outfile=./api/static/bundle.js --sourcemap --target=es2015 --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SCCWRP/empa-dataquery.git"
   },
-  "author": "Robert Butler",
+  "author": "Duy Nguyen",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/SCCWRP/empa-dataquery/issues"
@@ -27,6 +27,10 @@
     "esbuild": "^0.20.2"
   },
   "dependencies": {
+    "@esri/calcite-components": "^2.9.0",
+    "@esri/calcite-components-react": "^2.8.5",
+    "@esri/calcite-ui-icons": "^3.28.2",
+    "axios": "^1.7.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }

@@ -1,11 +1,17 @@
 import React from 'react';
-import MainPage from './components/MainPage';
+import Header from './components/Header';
+import QueryForm from './components/QueryForm';
+import './styles/generic.css';
+
+
+
 function App() {
-    return (
-
-        <MainPage />
-
-    );
+  return (
+    <div className="App">
+      <Header />
+      <QueryForm />
+    </div>
+  );
 }
 
 export default App;
