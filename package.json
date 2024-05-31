@@ -32,6 +32,7 @@
     "@esri/calcite-ui-icons": "^3.28.2",
     "axios": "^1.7.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-loader-spinner": "^6.1.6"
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './components/Header';
 import QueryForm from './components/QueryForm';
+import './styles/CustomDropdown.css';
 import './styles/generic.css';
 
 

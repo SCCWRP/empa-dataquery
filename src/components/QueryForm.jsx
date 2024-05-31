@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Dropdown from './Dropdown';
+import { TailSpin } from 'react-loader-spinner';
+
 
 const QueryForm = () => {
   const [regions, setRegions] = useState([]);
@@ -113,26 +115,31 @@ const QueryForm = () => {
       estuaryname: selectedEstuaries,
       dtype: selectedDtypes,
     };
-    console.log(selectedValues)
+    setLoading(true);
     axios.post('/empadataquery/downloaddata', selectedValues, { responseType: 'blob' })
     .then(response => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'data.zip'); // or set a different file name if desired
+      link.setAttribute('download', 'data.zip');
       document.body.appendChild(link);
       link.click();
       link.remove();
     })
     .catch(error => {
       console.error('Error submitting data:', error);
+    }).finally(() => {
+      setLoading(false); // Stop loading
     });
   }
 
-
-
   return (
     <div className="form-container">
+      {loading && (
+        <div className="loader-container">
+          <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" />
+        </div>
+      )}
       <form>
         <Dropdown
           id="region-select"

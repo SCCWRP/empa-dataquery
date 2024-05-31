@@ -40,14 +40,14 @@ def download_data():
             for tbl in tbls:
                 pkey = get_primary_key(tbl, g.eng)
                 if tbl == 'tbl_protocol_metadata':
-                    df = pd.read_sql(f"SELECT * FROM {tbl} LIMIT 1;", g.eng)
+                    continue
                 else:
-                    cols = ','.join(pd.read_sql(f"""
+                    cols = pd.read_sql(f"""
                         SELECT column_name 
                         FROM column_order 
                         WHERE table_name = '{tbl}' 
                         ORDER BY custom_column_position
-                    """, g.eng).column_name.tolist())
+                    """, g.eng).column_name.tolist()
                     query = f"""
                         SELECT t.* 
                         FROM {tbl} t
@@ -57,7 +57,12 @@ def download_data():
                         query += f" WHERE {where_clause}"
                     print(query)
                     df = pd.read_sql(query, g.eng)
-                df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
+                    print(cols)
+                    print(list(df.columns))
+                    
+                    # arrange columns
+                    df = df[[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)]]
+                    df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
         excel_files.append(excel_file_path)
 
     zip_file_path = f'{export_path}/data-{requestid}.zip'
