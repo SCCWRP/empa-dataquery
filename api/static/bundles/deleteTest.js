@@ -1,0 +1,1 @@
+fetch('/users/delete', { method: 'post', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 'email': 'robert.butler@usazion.org' }) }).then(resp => resp.json()).then(data => console.log(data))

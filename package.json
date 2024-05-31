@@ -1,0 +1,33 @@
+{
+  "name": "empadataquery",
+  "version": "1.0.0",
+  "description": "Simple app to query data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild ./src/index.jsx --bundle --outfile=./dist/static/bundles/app.js --minify --sourcemap --target=es2015",
+    "serve": "sudo ./docker/deploy.sh",
+    "restart": "sudo docker container restart empadataquery",
+    "logs": "sudo docker container logs -f empadataquery",
+    "clearlogs": "sudo truncate -s 0 $(docker inspect --format=\"{{.LogPath}}\" empadataquery)",
+    "ipython": "sudo docker container exec -it empadataquery ipython",
+    "dev": "esbuild ./src/index.jsx --bundle --outfile=./dist/static/bundle.js --sourcemap --target=es2015 --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SCCWRP/empa-dataquery.git"
+  },
+  "author": "Robert Butler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SCCWRP/empa-dataquery/issues"
+  },
+  "homepage": "https://github.com/SCCWRP/empa-dataquery#readme",
+  "devDependencies": {
+    "esbuild": "^0.20.2"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
