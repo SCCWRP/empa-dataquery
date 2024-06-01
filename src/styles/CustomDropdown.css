@@ -25,6 +25,9 @@
   padding: 20px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+  max-width: 400px; /* Adjust the width as needed */
+  max-height: 80vh; /* Adjust the height as needed */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 /* Other styles for CustomDropdown */
