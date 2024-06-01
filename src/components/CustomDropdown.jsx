@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-
 const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [localSelectedValues, setLocalSelectedValues] = useState(selectedValues);
@@ -38,13 +37,13 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
     document.body.classList.remove('blurred');
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('blurred');
-    } else {
-      document.body.classList.remove('blurred');
-    }
-  }, [isOpen]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     document.body.classList.add('blurred');
+  //   } else {
+  //     document.body.classList.remove('blurred');
+  //   }
+  // }, [isOpen]);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -59,8 +58,8 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
 
   return (
     <>
-      {isOpen && <div  />}
-      <div className="custom-dropdown" ref={dropdownRef}>
+      {isOpen && <div className="custom-dropdown-overlay"></div>}
+      <div className="custom-dropdown">
         <button
           type="button"
           className="custom-dropdown-toggle"
@@ -72,29 +71,31 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
           {selectedValues.join(', ') || 'None'}
         </div>
         {isOpen && (
-          <div className="custom-dropdown-menu">
-            <div className="custom-dropdown-actions">
-              <button type="button" onClick={handleSelectAll}>Select All</button>
-              <button type="button" onClick={handleDeselectAll}>Deselect All</button>
-              <button
-              type="button"
-              className="custom-dropdown-close"
-              onClick={handleClose}
-            >
-              Confirm
-            </button>
-            </div>
+          <div className="custom-dropdown-container" ref={dropdownRef}>
+            <div className="custom-dropdown-menu">
+              <div className="custom-dropdown-actions">
+                <button type="button" onClick={handleSelectAll}>Select All</button>
+                <button type="button" onClick={handleDeselectAll}>Deselect All</button>
+                <button
+                  type="button"
+                  className="custom-dropdown-close"
+                  onClick={handleClose}
+                >
+                  Confirm
+                </button>
+              </div>
 
-            {options.map((option) => (
-              <label key={option} className="custom-dropdown-option">
-                <input
-                  type="checkbox"
-                  checked={localSelectedValues.includes(option)}
-                  onChange={() => handleOptionChange(option)}
-                />
-                {option}
-              </label>
-            ))}
+              {options.map((option) => (
+                <label key={option} className="custom-dropdown-option">
+                  <input
+                    type="checkbox"
+                    checked={localSelectedValues.includes(option)}
+                    onChange={() => handleOptionChange(option)}
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
           </div>
         )}
       </div>
