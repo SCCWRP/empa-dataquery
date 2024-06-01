@@ -95,6 +95,7 @@ const QueryForm = () => {
       estuaryname: selectedEstuaries,
       dtype: selectedDtypes,
     };
+    console.log(selectedValues)
     setLoading(true);
     axios.post('/empadataquery/downloaddata', selectedValues, { responseType: 'blob' })
       .then(response => {

@@ -13,7 +13,6 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
     const newSelectedValues = localSelectedValues.includes(option)
       ? localSelectedValues.filter((value) => value !== option)
       : [...localSelectedValues, option];
-    console.log(newSelectedValues)
     setLocalSelectedValues(newSelectedValues);
   };
 
@@ -27,24 +26,19 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
 
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsOpen(false);
-      document.getElementById('root').classList.remove('blurred');
+      alert('Please press Confirm when you are done');
     }
   };
 
   const handleClose = () => {
-    onChange(localSelectedValues);
-    setIsOpen(false);
-    document.getElementById('root').classList.remove('blurred');
+    if (localSelectedValues.length === 0) {
+      alert('You need to choose at least one option');
+    } else {
+      onChange(localSelectedValues);
+      setIsOpen(false);
+      document.getElementById('root').classList.remove('blurred');
+    }
   };
-
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     document.getElementById('root').classList.add('blurred');
-  //   } else {
-  //     document.getElementById('root').classList.remove('blurred');
-  //   }
-  // }, [isOpen]);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);

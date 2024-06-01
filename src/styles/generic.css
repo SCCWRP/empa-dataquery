@@ -3,23 +3,26 @@
 }
 
 header {
-  background-color: #f1f1f1;
+  
   padding: 20px;
   border-bottom: 1px solid #ccc;
   margin-bottom: 20px;
 }
 
 header h1 {
+  background-color: #3498db;
   margin: 0;
-  font-size: 24px;
-  color: #333;
+  font-size: 36px;
+  color: white;
+  text-align: center;
 }
 
 header p, header ol {
   margin: 0;
   padding: 0;
   list-style-position: inside;
-  color: #666;
+  color: black;
+  font-size: 20px;
 }
 
 header ol {

@@ -53,7 +53,12 @@ def populate_dropdown():
     """
     print(qry)
     df = pd.read_sql(qry, g.eng)
-
+    
+    dtypes = []
+    for x in current_app.data_config.get('DATASETS').keys():
+        label = current_app.data_config.get('DATASETS').get(x).get('label')
+        if 'logger' not in label:
+            dtypes.append(label) 
 
     data = {
         'regions': df['region'].dropna().unique().tolist(),
@@ -61,7 +66,7 @@ def populate_dropdown():
         'mpa_statuses': df['mpastatus'].dropna().unique().tolist(),
         'estuary_types': df['estuarytype'].dropna().unique().tolist(),
         'estuaries': df['estuaryname'].dropna().unique().tolist(),
-        'dtypes': [x for x in current_app.datasets.keys() if x not in ['toxicity']] 
+        'dtypes': dtypes 
     }
 
     return jsonify(data)

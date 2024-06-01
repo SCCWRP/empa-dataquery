@@ -6,7 +6,7 @@ import json
 from zipfile import ZipFile
 from datetime import datetime
 import time
-from .utils import get_primary_key
+from .utils import *
 
 download = Blueprint('download', __name__, template_folder = 'templates')
 @download.route('/downloaddata', methods = ['GET','POST'])
@@ -34,8 +34,9 @@ def download_data():
     
     excel_files = []
     for dtype in dtypes:
-        tbls = current_app.datasets.get(dtype, [])
-        excel_file_path = os.path.join(export_path, f'{dtype}.xlsx')
+        true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), "Field Grab")
+        tbls = current_app.datasets.get(true_dtype, [])
+        excel_file_path = os.path.join(export_path, f'{true_dtype}.xlsx')
         with pd.ExcelWriter(excel_file_path) as writer:
             for tbl in tbls:
                 pkey = get_primary_key(tbl, g.eng)
@@ -49,7 +50,11 @@ def download_data():
                         ORDER BY custom_column_position
                     """, g.eng).column_name.tolist()
                     query = f"""
-                        SELECT t.* 
+                        SELECT t.*,
+                        s.region,
+                        s.estuaryclass,
+                        s.mpastatus,
+                        s.estuarytype
                         FROM {tbl} t
                         JOIN search s ON t.estuaryname = s.estuaryname AND t.siteid = s.siteid
                     """
@@ -61,7 +66,12 @@ def download_data():
                     print(list(df.columns))
                     
                     # arrange columns
-                    df = df[[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)]]
+                    df = df[
+                        [
+                            *[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)],
+                            *['region','estuaryclass','mpastatus','estuarytype']
+                        ]
+                    ]
                     df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
         excel_files.append(excel_file_path)
 

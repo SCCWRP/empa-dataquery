@@ -46,3 +46,9 @@ def get_primary_key(tablename, eng):
     pkey = pkey_df.column_name.tolist() if not pkey_df.empty else []
     
     return pkey
+
+def find_key_by_label(dictionary, target_label):
+    for key, value in dictionary.items():
+        if isinstance(value, dict) and value.get("label") == target_label:
+            return key
+    return None
