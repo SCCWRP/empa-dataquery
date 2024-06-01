@@ -13,6 +13,7 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
     const newSelectedValues = localSelectedValues.includes(option)
       ? localSelectedValues.filter((value) => value !== option)
       : [...localSelectedValues, option];
+    console.log(newSelectedValues)
     setLocalSelectedValues(newSelectedValues);
   };
 
@@ -27,21 +28,21 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsOpen(false);
-      document.body.classList.remove('blurred');
+      document.getElementById('root').classList.remove('blurred');
     }
   };
 
   const handleClose = () => {
     onChange(localSelectedValues);
     setIsOpen(false);
-    document.body.classList.remove('blurred');
+    document.getElementById('root').classList.remove('blurred');
   };
 
   // useEffect(() => {
   //   if (isOpen) {
-  //     document.body.classList.add('blurred');
+  //     document.getElementById('root').classList.add('blurred');
   //   } else {
-  //     document.body.classList.remove('blurred');
+  //     document.getElementById('root').classList.remove('blurred');
   //   }
   // }, [isOpen]);
 
@@ -74,8 +75,6 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
           <div className="custom-dropdown-container" ref={dropdownRef}>
             <div className="custom-dropdown-menu">
               <div className="custom-dropdown-actions">
-                <button type="button" onClick={handleSelectAll}>Select All</button>
-                <button type="button" onClick={handleDeselectAll}>Deselect All</button>
                 <button
                   type="button"
                   className="custom-dropdown-close"
@@ -83,6 +82,8 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
                 >
                   Confirm
                 </button>
+                <button type="button" onClick={handleSelectAll}>Select All</button>
+                <button type="button" onClick={handleDeselectAll}>Deselect All</button>
               </div>
 
               {options.map((option) => (

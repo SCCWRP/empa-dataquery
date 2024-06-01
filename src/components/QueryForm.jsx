@@ -25,6 +25,7 @@ const QueryForm = () => {
     axios.get(`/empadataquery/populatedropdown?${queryString}`)
       .then(response => {
         const data = response.data;
+        
         setRegions(data.regions);
         setEstuaryClasses(data.estuary_classes);
         setMpaStatuses(data.mpa_statuses);
@@ -32,13 +33,14 @@ const QueryForm = () => {
         setEstuaries(data.estuaries);
         setDtypes(data.dtypes);
 
+        setSelectedRegions(data.regions);
+        setSelectedEstuaryClasses(data.estuary_classes);
+        setSelectedMpaStatuses(data.mpa_statuses);
+        setSelectedEstuaryTypes(data.estuary_types);
+        setSelectedEstuaries(data.estuaries);
+
         // Automatically select all options for initial load
         if (Object.keys(params).length === 0) {
-          setSelectedRegions(data.regions);
-          setSelectedEstuaryClasses(data.estuary_classes);
-          setSelectedMpaStatuses(data.mpa_statuses);
-          setSelectedEstuaryTypes(data.estuary_types);
-          setSelectedEstuaries(data.estuaries);
           setSelectedDtypes(data.dtypes.length > 0 ? [data.dtypes[0]] : []);
         }
       })
