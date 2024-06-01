@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Dropdown from './Dropdown';
+import CustomDropdown from './CustomDropdown';
 import { TailSpin } from 'react-loader-spinner';
-
 
 const QueryForm = () => {
   const [regions, setRegions] = useState([]);
@@ -18,9 +17,8 @@ const QueryForm = () => {
   const [selectedEstuaryTypes, setSelectedEstuaryTypes] = useState([]);
   const [selectedEstuaries, setSelectedEstuaries] = useState([]);
   const [selectedDtypes, setSelectedDtypes] = useState([]);
-  const [loading, setLoading] = useState(false); // Define setLoading here
-  
-  
+  const [loading, setLoading] = useState(false);
+
   const fetchDropdownData = (params = {}) => {
     setLoading(true);
     const queryString = new URLSearchParams(params).toString();
@@ -33,6 +31,16 @@ const QueryForm = () => {
         setEstuaryTypes(data.estuary_types);
         setEstuaries(data.estuaries);
         setDtypes(data.dtypes);
+
+        // Automatically select all options for initial load
+        if (Object.keys(params).length === 0) {
+          setSelectedRegions(data.regions);
+          setSelectedEstuaryClasses(data.estuary_classes);
+          setSelectedMpaStatuses(data.mpa_statuses);
+          setSelectedEstuaryTypes(data.estuary_types);
+          setSelectedEstuaries(data.estuaries);
+          setSelectedDtypes(data.dtypes.length > 0 ? [data.dtypes[0]] : []);
+        }
       })
       .catch(error => {
         console.error('Error fetching dropdown data:', error);
@@ -43,58 +51,27 @@ const QueryForm = () => {
   };
 
   useEffect(() => {
-    // Fetch initial data for all dropdowns
     fetchDropdownData();
   }, []);
 
-  useEffect(() => {
-    fetchDropdownData({ 
-      region: selectedRegions.join(','), 
-      estuary_class: selectedEstuaryClasses.join(','), 
-      mpa_status: selectedMpaStatuses.join(','), 
-      estuary_type: selectedEstuaryTypes.join(','), 
+  const handleDropdownChange = (selectedValues, dropdownSetter, type) => {
+    dropdownSetter(selectedValues);
+
+    // Create params based on the selected values
+    const params = {
+      region: selectedRegions.join(','),
+      estuary_class: selectedEstuaryClasses.join(','),
+      mpa_status: selectedMpaStatuses.join(','),
+      estuary_type: selectedEstuaryTypes.join(','),
       estuary: selectedEstuaries.join(',')
-    });
-  }, [selectedRegions, selectedEstuaryClasses, selectedMpaStatuses, selectedEstuaryTypes, selectedEstuaries]);
+    };
 
-  const handleRegionChange = (e) => {
-    console.log("region change")
-    const options = e.target.options;
-    const values = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setSelectedRegions(values);
-  };
+    // Add the new selection to the params
+    params[type] = selectedValues.join(',');
 
-  const handleEstuaryClassChange = (e) => {
-    console.log("handleEstuaryClassChange")
-    const options = e.target.options;
-    const values = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setSelectedEstuaryClasses(values);
+    // Fetch the new data based on the updated params
+    fetchDropdownData(params);
   };
-
-  const handleMpaStatusChange = (e) => {
-    const options = e.target.options;
-    const values = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setSelectedMpaStatuses(values);
-  };
-
-  const handleEstuaryTypeChange = (e) => {
-    const options = e.target.options;
-    const values = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setSelectedEstuaryTypes(values);
-  };
-
-  const handleEstuaryChange = (e) => {
-    const options = e.target.options;
-    const values = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setSelectedEstuaries(values);
-  };
-  
-  const handleDtypeChange = (e) => {
-    const options = e.target.options;
-    const values = Array.from(options).filter(option => option.selected).map(option => option.value);
-    setSelectedDtypes(values);
-  };
-  
 
   const handleReset = () => {
     setSelectedRegions([]);
@@ -102,6 +79,7 @@ const QueryForm = () => {
     setSelectedMpaStatuses([]);
     setSelectedEstuaryTypes([]);
     setSelectedEstuaries([]);
+    setSelectedDtypes([]);
     fetchDropdownData(); // Re-fetch initial data
   };
 
@@ -117,75 +95,72 @@ const QueryForm = () => {
     };
     setLoading(true);
     axios.post('/empadataquery/downloaddata', selectedValues, { responseType: 'blob' })
-    .then(response => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'data.zip');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    })
-    .catch(error => {
-      console.error('Error submitting data:', error);
-    }).finally(() => {
-      setLoading(false); // Stop loading
-    });
-  }
+      .then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'data.zip');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch(error => {
+        console.error('Error submitting data:', error);
+      }).finally(() => {
+        setLoading(false); // Stop loading
+      });
+  };
 
   return (
     <div className="form-container">
       {loading && (
-        <div className="loader-container">
-          <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" />
-        </div>
+        <>
+          <div className="loader-overlay"></div>
+          <div className="loader-container">
+            <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" />
+          </div>
+        </>
       )}
-      <form>
-        <Dropdown
-          id="region-select"
+      <form onSubmit={handleSubmit}>
+        <CustomDropdown
           label="Select Region"
           options={regions}
           selectedValues={selectedRegions}
-          onChange={handleRegionChange}
+          onChange={(values) => handleDropdownChange(values, setSelectedRegions, 'region')}
         />
-        <Dropdown
-          id="estuary-class-select"
+        <CustomDropdown
           label="Select Estuary Classes"
           options={estuaryClasses}
           selectedValues={selectedEstuaryClasses}
-          onChange={handleEstuaryClassChange}
+          onChange={(values) => handleDropdownChange(values, setSelectedEstuaryClasses, 'estuary_class')}
         />
-        <Dropdown
-          id="mpa-status-select"
+        <CustomDropdown
           label="Select MPA Status"
           options={mpaStatuses}
           selectedValues={selectedMpaStatuses}
-          onChange={handleMpaStatusChange}
+          onChange={(values) => handleDropdownChange(values, setSelectedMpaStatuses, 'mpa_status')}
         />
-        <Dropdown
-          id="estuary-type-select"
+        <CustomDropdown
           label="Select Estuary Types"
           options={estuaryTypes}
           selectedValues={selectedEstuaryTypes}
-          onChange={handleEstuaryTypeChange}
+          onChange={(values) => handleDropdownChange(values, setSelectedEstuaryTypes, 'estuary_type')}
         />
-        <Dropdown
-          id="estuary-select"
+        <CustomDropdown
           label="Select Estuaries"
           options={estuaries}
           selectedValues={selectedEstuaries}
-          onChange={handleEstuaryChange}
+          onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'estuary')}
         />
-        <Dropdown
-          id="dtype-select"
+        <CustomDropdown
           label="Select SOP to download data"
           options={dtypes}
           selectedValues={selectedDtypes}
-          onChange={handleDtypeChange}
+          onChange={(values) => handleDropdownChange(values, setSelectedDtypes, 'dtype')}
         />
         <div>
           <button type="button" onClick={handleReset}>Reset</button>
-          <button type="submit" onClick={handleSubmit}>Download Data</button>
+          <button type="submit">Download Data</button>
           <button type="button">Map - available soon</button>
           <button type="button">Analysis - available soon</button>
         </div>

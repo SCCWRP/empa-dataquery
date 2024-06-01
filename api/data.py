@@ -61,7 +61,7 @@ def populate_dropdown():
         'mpa_statuses': df['mpastatus'].dropna().unique().tolist(),
         'estuary_types': df['estuarytype'].dropna().unique().tolist(),
         'estuaries': df['estuaryname'].dropna().unique().tolist(),
-        'dtypes': list(current_app.datasets.keys())
+        'dtypes': [x for x in current_app.datasets.keys() if x not in ['toxicity']] 
     }
 
     return jsonify(data)
