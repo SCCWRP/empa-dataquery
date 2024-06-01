@@ -34,7 +34,7 @@ def download_data():
     
     excel_files = []
     for dtype in dtypes:
-        true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), "Field Grab")
+        true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
         tbls = current_app.datasets.get(true_dtype, [])
         excel_file_path = os.path.join(export_path, f'{true_dtype}.xlsx')
         with pd.ExcelWriter(excel_file_path) as writer:

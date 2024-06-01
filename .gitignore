@@ -1,4 +1,5 @@
 docker/deploy.sh
+docker/restart_app.sh
 node_modules/
 __pycache__/
 testing/

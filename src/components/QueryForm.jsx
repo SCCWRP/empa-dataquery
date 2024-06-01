@@ -162,8 +162,8 @@ const QueryForm = () => {
           onChange={(values) => handleDropdownChange(values, setSelectedDtypes, 'dtype')}
         />
         <div>
-          <button type="button" onClick={handleReset}>Reset</button>
           <button type="submit">Download Data</button>
+          <button type="button" onClick={handleReset}>Reset</button>
           <button type="button">Map - available soon</button>
           <button type="button">Analysis - available soon</button>
         </div>
