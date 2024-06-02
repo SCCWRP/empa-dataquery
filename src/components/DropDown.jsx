@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
+const DropDownSelector = ({ label, options, selectedValues, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [localSelectedValues, setLocalSelectedValues] = useState(selectedValues);
   const dropdownRef = useRef(null);
@@ -98,4 +98,4 @@ const CustomDropdown = ({ label, options, selectedValues, onChange }) => {
   );
 };
 
-export default CustomDropdown;
+export default DropDownSelector;

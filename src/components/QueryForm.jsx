@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CustomDropdown from './CustomDropdown';
+import DropDownSelector from './DropDown';
 import { TailSpin } from 'react-loader-spinner';
 
 const QueryForm = () => {
@@ -96,9 +96,13 @@ const QueryForm = () => {
       dtype: selectedDtypes,
     };
     console.log(selectedValues)
+    
     setLoading(true);
+
     axios.post('/empadataquery/downloaddata', selectedValues, { responseType: 'blob' })
-      .then(response => {
+    .then(response => {
+      console.log(response.status)
+      if (response.status === 200) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
@@ -106,12 +110,19 @@ const QueryForm = () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-      })
-      .catch(error => {
-        console.error('Error submitting data:', error);
-      }).finally(() => {
-        setLoading(false); // Stop loading
-      });
+      } else {
+        alert('Unexpected Error Occured. Please contact Duy Nguyen duyn@sccwrp.org for assistance');
+      }
+    })
+    .catch(error => {
+      alert('Unexpected Error Occured. Please contact Duy Nguyen duyn@sccwrp.org for assistance');
+      console.error('Error submitting data:', error);
+    })
+    .finally(() => {
+      setLoading(false); // Stop loading
+    });
+  
+
   };
 
   return (
@@ -125,37 +136,37 @@ const QueryForm = () => {
         </>
       )}
       <form onSubmit={handleSubmit}>
-        <CustomDropdown
+        <DropDownSelector
           label="Select Region"
           options={regions}
           selectedValues={selectedRegions}
           onChange={(values) => handleDropdownChange(values, setSelectedRegions, 'region')}
         />
-        <CustomDropdown
+        <DropDownSelector
           label="Select Estuary Classes"
           options={estuaryClasses}
           selectedValues={selectedEstuaryClasses}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaryClasses, 'estuary_class')}
         />
-        <CustomDropdown
+        <DropDownSelector
           label="Select MPA Status"
           options={mpaStatuses}
           selectedValues={selectedMpaStatuses}
           onChange={(values) => handleDropdownChange(values, setSelectedMpaStatuses, 'mpa_status')}
         />
-        <CustomDropdown
+        <DropDownSelector
           label="Select Estuary Types"
           options={estuaryTypes}
           selectedValues={selectedEstuaryTypes}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaryTypes, 'estuary_type')}
         />
-        <CustomDropdown
+        <DropDownSelector
           label="Select Estuaries"
           options={estuaries}
           selectedValues={selectedEstuaries}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'estuary')}
         />
-        <CustomDropdown
+        <DropDownSelector
           label="Select SOP to download data"
           options={dtypes}
           selectedValues={selectedDtypes}
