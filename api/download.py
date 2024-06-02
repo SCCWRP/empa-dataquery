@@ -6,6 +6,8 @@ import json
 from zipfile import ZipFile
 from datetime import datetime
 import time
+import shutil
+
 from .utils import *
 
 download = Blueprint('download', __name__, template_folder = 'templates')
@@ -31,7 +33,8 @@ def download_data():
         
         requestid = int(time.time())
         export_path = os.path.join(os.getcwd(), "api", "export")
-        
+        metadata_template_path = os.path.join(os.getcwd(), "api", "export", "metadata_files", "projectname_datatype_EXAMPLE_ONLY.xml")
+
         excel_files = []
         for dtype in dtypes:
             true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
@@ -74,11 +77,17 @@ def download_data():
                         ]
                         df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
             excel_files.append(excel_file_path)
+            
+            # only for demo purpose. When I get correct metadata from Jan, the code below will be replaced.
+            renamed_metadata_file = os.path.join(export_path, f"metadata_{true_dtype}_FGDC_EXAMPLE_ONLY.xml")
+            shutil.copy(metadata_template_path, renamed_metadata_file)
+            excel_files.append(renamed_metadata_file)
 
         zip_file_path = f'{export_path}/data-{requestid}.zip'
         with ZipFile(zip_file_path, 'w') as zipf:
             for file in excel_files:
                 zipf.write(file, os.path.basename(file))
+    
 
         # Clean up Excel files after zipping
         for file in excel_files:
