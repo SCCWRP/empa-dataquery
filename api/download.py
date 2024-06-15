@@ -10,6 +10,23 @@ import shutil
 
 from .utils import *
 
+META_DICT = {
+    "grab_field": "Field Grab",
+    "discretewq": "Discrete Water Quality",
+    "sedchem_lab": "Sediment and Water Chemistry",
+    "edna_field": "eDNA Field",
+    "sedimentgrainsize_lab": "Sediment Grainsize",
+    "benthicinfauna_lab": "Benthic Infauna Small",
+    "benthiclarge": "Benthic Infauna Large",
+    "macroalgae": "Macroalgae",
+    "bruv_field": "BRUVs",
+    "bruv_lab": "BRUVs",
+    "fishseines": "Fish Seines",
+    "crabtrap": "Crab Traps",
+    "vegetation": "Marsh Plain Vegetation and Epifauna Surveys",
+    "feldspar": "Feldspar",
+    "trash": "Trash",
+}
 download = Blueprint('download', __name__, template_folder = 'templates')
 @download.route('/downloaddata', methods = ['GET','POST'])
 def download_data():
@@ -36,6 +53,8 @@ def download_data():
         metadata_template_path = os.path.join(os.getcwd(), "api", "export", "metadata_files", "projectname_datatype_EXAMPLE_ONLY.xml")
 
         excel_files = []
+        xml_files = []
+
         for dtype in dtypes:
             true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
             tbls = current_app.datasets.get(true_dtype, [])
@@ -64,10 +83,7 @@ def download_data():
                         if where_clause:
                             query += f" WHERE {where_clause}"
                         print(query)
-                        df = pd.read_sql(query, g.eng)
-                        print(cols)
-                        print(list(df.columns))
-                        
+                        df = pd.read_sql(query, g.eng)                        
                         # arrange columns
                         df = df[
                             [
@@ -78,17 +94,21 @@ def download_data():
                         df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
             excel_files.append(excel_file_path)
             
-            # only for demo purpose. When I get correct metadata from Jan, the code below will be replaced.
-            renamed_metadata_file = os.path.join(export_path, f"metadata_{true_dtype}_FGDC_EXAMPLE_ONLY.xml")
-            shutil.copy(metadata_template_path, renamed_metadata_file)
-            excel_files.append(renamed_metadata_file)
+            # Get the metadata type from META_DICT
+            metadata_type = META_DICT.get(true_dtype)
+            
+            # Look for matching XML files in the metadata_files folder
+            metadata_files_path = os.path.join(export_path, "metadata_files")
+            for file in os.listdir(metadata_files_path):
+                if file.endswith(".xml") and metadata_type in file:
+                    metadata_file_path = os.path.join(metadata_files_path, file)
+                    xml_files.append(metadata_file_path)
 
         zip_file_path = f'{export_path}/data-{requestid}.zip'
         with ZipFile(zip_file_path, 'w') as zipf:
-            for file in excel_files:
+            for file in excel_files + xml_files:
                 zipf.write(file, os.path.basename(file))
     
-
         # Clean up Excel files after zipping
         for file in excel_files:
             os.remove(file)
