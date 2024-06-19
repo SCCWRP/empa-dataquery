@@ -86,7 +86,8 @@ def download_data():
                         df = pd.read_sql(query, g.eng)                        
                         # arrange columns
                         df = df[
-                            [
+                            [   
+                                *['objectid'],
                                 *[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)],
                                 *['region','estuaryclass','mpastatus','estuarytype']
                             ]
