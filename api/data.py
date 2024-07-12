@@ -13,6 +13,14 @@ def populate_dropdown():
     selected_mpa_status = request.args.get('mpa_status', default=None)
     selected_estuary_type = request.args.get('estuary_type', default=None)
     selected_estuary = request.args.get('estuary', default=None)
+    selected_projectid = request.args.get('projectid', default=None)
+    selected_year = request.args.get('year', default=None)
+
+    if selected_projectid is None:
+        selected_projectid = "EMPA,Baja-rails"
+    if selected_year is None:
+        selected_year = "2021,2022,2023,2024"
+
 
     query_conditions = []
     if selected_region:
@@ -66,7 +74,9 @@ def populate_dropdown():
         'mpa_statuses': df['mpastatus'].dropna().unique().tolist(),
         'estuary_types': df['estuarytype'].dropna().unique().tolist(),
         'estuaries': df['estuaryname'].dropna().unique().tolist(),
-        'dtypes': dtypes 
+        'dtypes': dtypes,
+        'projectids': selected_projectid.split(","),
+        'years': selected_year.split(",")
     }
 
     return jsonify(data)

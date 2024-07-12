@@ -10,6 +10,8 @@ const QueryForm = () => {
   const [estuaryTypes, setEstuaryTypes] = useState([]);
   const [estuaries, setEstuaries] = useState([]);
   const [dtypes, setDtypes] = useState([]);
+  const [projectid, setProjectID] = useState([]);
+  const [year, setYear] = useState([]);
 
   const [selectedRegions, setSelectedRegions] = useState([]);
   const [selectedEstuaryClasses, setSelectedEstuaryClasses] = useState([]);
@@ -17,6 +19,8 @@ const QueryForm = () => {
   const [selectedEstuaryTypes, setSelectedEstuaryTypes] = useState([]);
   const [selectedEstuaries, setSelectedEstuaries] = useState([]);
   const [selectedDtypes, setSelectedDtypes] = useState([]);
+  const [selectedProjectID, setSelectedProjectID] = useState([]);
+  const [selectedYear, setSelectedYear] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchDropdownData = (params = {}) => {
@@ -32,12 +36,16 @@ const QueryForm = () => {
         setEstuaryTypes(data.estuary_types);
         setEstuaries(data.estuaries);
         setDtypes(data.dtypes);
+        setProjectID(data.projectids);
+        setYear(data.years);
 
         setSelectedRegions(data.regions);
         setSelectedEstuaryClasses(data.estuary_classes);
         setSelectedMpaStatuses(data.mpa_statuses);
         setSelectedEstuaryTypes(data.estuary_types);
         setSelectedEstuaries(data.estuaries);
+        setSelectedProjectID(data.projectids);
+        setSelectedYear(data.years);
 
         // Automatically select all options for initial load
         if (Object.keys(params).length === 0) {
@@ -65,7 +73,9 @@ const QueryForm = () => {
       estuary_class: selectedEstuaryClasses.join(','),
       mpa_status: selectedMpaStatuses.join(','),
       estuary_type: selectedEstuaryTypes.join(','),
-      estuary: selectedEstuaries.join(',')
+      estuary: selectedEstuaries.join(','),
+      projectid: selectedProjectID.join(','),
+      year: selectedYear.join(',')
     };
 
     // Add the new selection to the params
@@ -82,6 +92,9 @@ const QueryForm = () => {
     setSelectedEstuaryTypes([]);
     setSelectedEstuaries([]);
     setSelectedDtypes([]);
+    setSelectedProjectID([]);
+    setSelectedYear([]);
+
     fetchDropdownData(); // Re-fetch initial data
   };
 
@@ -94,6 +107,9 @@ const QueryForm = () => {
       estuarytype: selectedEstuaryTypes,
       estuaryname: selectedEstuaries,
       dtype: selectedDtypes,
+      projectid: selectedProjectID,
+      year: selectedYear
+
     };
     console.log(selectedValues)
     
@@ -165,6 +181,18 @@ const QueryForm = () => {
           options={estuaries}
           selectedValues={selectedEstuaries}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'estuary')}
+        />
+        <DropDownSelector
+          label="Select ProjectID"
+          options={projectid}
+          selectedValues={selectedProjectID}
+          onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'projectid')}
+        />
+        <DropDownSelector
+          label="Select Year"
+          options={year}
+          selectedValues={selectedYear}
+          onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'year')}
         />
         <DropDownSelector
           label="Select SOP to download data"
