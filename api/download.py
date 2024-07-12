@@ -9,6 +9,7 @@ import time
 import shutil
 
 from .utils import *
+from .mail import send_mail, data_receipt
 
 META_DICT = {
     "grab_field": "Field Grab",
@@ -30,18 +31,24 @@ META_DICT = {
 download = Blueprint('download', __name__, template_folder = 'templates')
 @download.route('/downloaddata', methods = ['GET','POST'])
 def download_data():
+
+    request_data = request.get_json()
+    cleaned_data = {k: v for k, v in request_data.items() if v}
+
+    region = cleaned_data['region']
+    estuaryclass = cleaned_data['estuaryclass']
+    mpastatus = cleaned_data['mpastatus']
+    estuarytype = cleaned_data['estuarytype']
+    estuaryname = cleaned_data['estuaryname']
+
+    # Extract these separately since the WHERE clause is for the search table, not the main table.
+    dtypes = cleaned_data.pop('dtype', None)
+    projectids = cleaned_data.pop('projectid', None)
+    years = cleaned_data.pop('year', None)
+    projectids = "'" + "','".join(projectids) + "'"
+    years = "'" + "','".join(years) + "'"
+    
     try:
-        request_data = request.get_json()
-        cleaned_data = {k: v for k, v in request_data.items() if v}
-
-
-        # Extract these separately since the WHERE clause is for the search table, not the main table.
-        dtypes = cleaned_data.pop('dtype', None)
-        projectids = cleaned_data.pop('projectid', None)
-        years = cleaned_data.pop('year', None)
-        projectids = "'" + "','".join(projectids) + "'"
-        years = "'" + "','".join(years) + "'"
-
         # Build WHERE clause
         where_conditions = []
         for key, values in cleaned_data.items():
@@ -119,10 +126,29 @@ def download_data():
         # Clean up Excel files after zipping
         for file in excel_files:
             os.remove(file)
+        data_receipt(
+            send_from = 'admin@relay.sccwrp.org',
+            always_send_to = ['empa-im@sccwrp.org'],
+            login_email = 'duyn@sccwrp.org',
+            dtype = dtypes,
+            region = region,
+            estuaryclass = estuaryclass,
+            mpastatus = mpastatus,
+            estuarytype = estuarytype,
+            estuaryname = estuaryname,
+            projectid = projectids,
+            year = years,
+            originalfile = zip_file_path,
+            eng = g.eng,
+            mailserver = "192.168.1.18"
+        )
 
         return send_file(zip_file_path, as_attachment=True, download_name=f'data-{requestid}.zip')
     
     except Exception as e:
         print(f"THERE WAS AN EROR: {e}")
+        err_msg = f"THERE WAS A CRITICAL ERROR:\n {e}\n {cleaned_data}"
+        send_mail('admin@relay.sccwrp.org', ['empa-im@sccwrp.org'], 'EMPA Advanced Data Query ERROR', err_msg, filename=None, server="192.168.1.18")
+
         return {"error": str(e)}, 500
     
