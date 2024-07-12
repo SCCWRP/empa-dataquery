@@ -41,14 +41,14 @@ def download_data():
     estuarytype = cleaned_data['estuarytype']
     estuaryname = cleaned_data['estuaryname']
 
-    # Extract these separately since the WHERE clause is for the search table, not the main table.
-    dtypes = cleaned_data.pop('dtype', None)
-    projectids = cleaned_data.pop('projectid', None)
-    years = cleaned_data.pop('year', None)
-    projectids = "'" + "','".join(projectids) + "'"
-    years = "'" + "','".join(years) + "'"
-    
     try:
+        # Extract these separately since the WHERE clause is for the search table, not the main table.
+        dtypes = cleaned_data.pop('dtype', None)
+        projectids = cleaned_data.pop('projectid', None)
+        years = cleaned_data.pop('year', None)
+        projectids = "'" + "','".join(projectids) + "'"
+        years = "'" + "','".join(years) + "'"
+    
         # Build WHERE clause
         where_conditions = []
         for key, values in cleaned_data.items():
@@ -63,8 +63,7 @@ def download_data():
         
         requestid = int(time.time())
         export_path = os.path.join(os.getcwd(), "api", "export")
-        metadata_template_path = os.path.join(os.getcwd(), "api", "export", "metadata_files", "projectname_datatype_EXAMPLE_ONLY.xml")
-
+      
         excel_files = []
         xml_files = []
 
@@ -126,6 +125,7 @@ def download_data():
         # Clean up Excel files after zipping
         for file in excel_files:
             os.remove(file)
+            
         data_receipt(
             send_from = 'admin@relay.sccwrp.org',
             always_send_to = ['empa-im@sccwrp.org'],
