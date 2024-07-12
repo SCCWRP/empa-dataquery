@@ -17,7 +17,7 @@ def populate_dropdown():
     selected_year = request.args.get('year', default=None)
 
     if selected_projectid is None:
-        selected_projectid = "EMPA,Baja-rails"
+        selected_projectid = ','.join(pd.read_sql("SELECT * FROM lu_project", g.eng).projectid.tolist())
     if selected_year is None:
         selected_year = "2021,2022,2023,2024"
 

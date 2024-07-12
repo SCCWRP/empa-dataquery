@@ -33,8 +33,14 @@ def download_data():
     try:
         request_data = request.get_json()
         cleaned_data = {k: v for k, v in request_data.items() if v}
-        # Extract dtype separately
+
+
+        # Extract these separately since the WHERE clause is for the search table, not the main table.
         dtypes = cleaned_data.pop('dtype', None)
+        projectids = cleaned_data.pop('projectid', None)
+        years = cleaned_data.pop('year', None)
+        projectids = "'" + "','".join(projectids) + "'"
+        years = "'" + "','".join(years) + "'"
 
         # Build WHERE clause
         where_conditions = []
@@ -81,7 +87,7 @@ def download_data():
                             JOIN search s ON t.estuaryname = s.estuaryname AND t.siteid = s.siteid
                         """
                         if where_clause:
-                            query += f" WHERE {where_clause}"
+                            query += f" WHERE {where_clause} AND t.projectid in ({projectids}) AND EXTRACT(YEAR FROM t.samplecollectiondate) IN ({years})"
                         print(query)
                         df = pd.read_sql(query, g.eng)                        
                         # arrange columns
@@ -119,3 +125,4 @@ def download_data():
     except Exception as e:
         print(f"THERE WAS AN EROR: {e}")
         return {"error": str(e)}, 500
+    
