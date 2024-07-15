@@ -1,7 +1,8 @@
 import pandas as pd
-from flask import Blueprint, request, Response, make_response
-import os
-
+import os, traceback
+from flask import Blueprint, request, Response, make_response, current_app, jsonify
+from functools import wraps
+from .mail import send_mail
 
 # Basic Authentication Function
 def check_auth(username, password):
@@ -74,3 +75,28 @@ def find_key_by_label(dictionary, target_label):
         if isinstance(value, dict) and value.get("label") == target_label:
             return key
     return None
+
+def error_handler(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            # Log the error
+            current_app.logger.error(f"Error occurred: {e}")
+            current_app.logger.error(traceback.format_exc())
+
+            # Send an error email
+            err_msg = f"THERE WAS A CRITICAL ERROR:\n {e}\n {request.get_json()}"
+            send_mail(
+                current_app.mail_from, 
+                current_app.maintainers, 
+                'EMPA Advanced Data Query ERROR', 
+                err_msg, 
+                filename=None, 
+                server=current_app.config['MAIL_SERVER']
+            )
+
+            # Return a JSON response with the error
+            return jsonify(error=str(e)), 500
+    return decorated_function
