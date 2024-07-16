@@ -32,7 +32,7 @@ def send_mail(send_from, send_to, subject, text, filename=None, server="localhos
     smtp.close()
 
 
-def data_receipt(send_from, always_send_to, login_email, dtype, region, estuaryclass, mpastatus, estuarytype, estuaryname, projectid, year, originalfile, eng, mailserver, *args, **kwargs):
+def data_receipt(send_from, always_send_to, login_name, login_email, dtype, region, estuaryclass, mpastatus, estuarytype, estuaryname, projectid, year, originalfile, eng, mailserver, *args, **kwargs):
     """
     Depending on the project, this function will likely need to be modified. In some cases there are agencies and data owners that
     must be incuded in the email body or subject.
@@ -49,15 +49,16 @@ def data_receipt(send_from, always_send_to, login_email, dtype, region, estuaryc
 
     email_subject = f"EMPA Advanced Data Query Notification"
     email_body = f"There was a data download from EMPA Advanced Data Query \n"
-    email_body += f"Requester: {login_email}\n"
-    email_body += f"Region: {region}\n"
-    email_body += f"Estuary Classes: {estuaryclass}\n"
-    email_body += f"MPA Status: {mpastatus}\n"
-    email_body += f"Estuary Types: {estuarytype}\n"
-    email_body += f"Estuaries: {estuaryname}\n"
-    email_body += f"ProjectIDs: {projectid}\n"
-    email_body += f"Years: {year}\n"
-    email_body += f"SOPs: {dtype}\n"
+    email_body += f"User's Name: {login_name}\n\n"
+    email_body += f"User's Email: {login_email}\n\n"
+    email_body += f"Region: {region}\n\n"
+    email_body += f"Estuary Classes: {estuaryclass}\n\n"
+    email_body += f"MPA Status: {mpastatus}\n\n"
+    email_body += f"Estuary Types: {estuarytype}\n\n"
+    email_body += f"Estuaries: {estuaryname}\n\n"
+    email_body += f"ProjectIDs: {projectid}\n\n"
+    email_body += f"Years: {year}\n\n"
+    email_body += f"SOPs: {dtype}\n\n"
     # email_body += f"Date Received: {pd.Timestamp(submissionid, unit = 's').strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     # email_body += "Session Login Information:\n\t"
     # for k,v in login_info.items():

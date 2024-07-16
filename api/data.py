@@ -68,12 +68,32 @@ def populate_dropdown():
         if 'logger' not in label and 'toxicity' not in label:
             dtypes.append(label) 
 
+    # Create and sort the list for 'region'
+    regions = df['region'].dropna().unique().tolist()
+    regions.sort()
+
+    # Create and sort the list for 'estuaryclass'
+    estuary_classes = df['estuaryclass'].dropna().unique().tolist()
+    estuary_classes.sort()
+
+    # Create and sort the list for 'mpastatus'
+    mpa_statuses = df['mpastatus'].dropna().unique().tolist()
+    mpa_statuses.sort()
+
+    # Create and sort the list for 'estuarytype'
+    estuary_types = df['estuarytype'].dropna().unique().tolist()
+    estuary_types.sort()
+
+    # Create and sort the list for 'estuaryname'
+    estuaries = df['estuaryname'].dropna().unique().tolist()
+    estuaries.sort()
+
     data = {
-        'regions': df['region'].dropna().unique().tolist(),
-        'estuary_classes': df['estuaryclass'].dropna().unique().tolist(),
-        'mpa_statuses': df['mpastatus'].dropna().unique().tolist(),
-        'estuary_types': df['estuarytype'].dropna().unique().tolist(),
-        'estuaries': df['estuaryname'].dropna().unique().tolist(),
+        'regions': regions,
+        'estuary_classes': estuary_classes,
+        'mpa_statuses': mpa_statuses,
+        'estuary_types': estuary_types,
+        'estuaries': estuaries,
         'dtypes': dtypes,
         'projectids': selected_projectid.split(","),
         'years': selected_year.split(",")

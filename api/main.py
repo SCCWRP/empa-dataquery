@@ -9,27 +9,8 @@ homepage = Blueprint('homepage', __name__)
 # Main app page
 @homepage.route('/', defaults={'path': ''}, methods = ['GET','POST'])
 @homepage.route('/<path:path>', methods = ['GET','POST'])
-@requires_auth
-def main(path):
-    # if path == 'login':
-    #     if request.method == 'POST':
-    #         data = request.json
-    #         pw = data.get('pw')
-    #         correct_pw = (pw == os.getenv("APP_PW"))
-    #         session['AUTHORIZED'] = correct_pw
-    #         if True:
-    #             return jsonify({"message":"success", "redirectLocation": request.script_root})
-                
-    #         return jsonify({"error":"Login Failed"})
-    #     else:
-    #         return render_template('login.jinja2')
-    
-    # if path == 'data':
-        
-    
-    # if not session.get('AUTHORIZED'):
-    #     return render_template('login.jinja2')
-            
+#@requires_auth
+def main(path):            
     return render_template('app.jinja2')
     
     

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DropDownSelector from './DropDown';
 import { TailSpin } from 'react-loader-spinner';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const QueryForm = () => {
   const [regions, setRegions] = useState([]);
@@ -22,6 +23,11 @@ const QueryForm = () => {
   const [selectedProjectID, setSelectedProjectID] = useState([]);
   const [selectedYear, setSelectedYear] = useState([]);
   const [loading, setLoading] = useState(false);
+
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
 
   const fetchDropdownData = (params = {}) => {
     setLoading(true);
@@ -94,12 +100,35 @@ const QueryForm = () => {
     setSelectedDtypes([]);
     setSelectedProjectID([]);
     setSelectedYear([]);
+    setName('');
+    setEmail('');
 
     fetchDropdownData(); // Re-fetch initial data
   };
 
+  // const validateForm = () => {
+  //   const newErrors = {};
+  //   if (!name) newErrors.name = 'Name is required';
+  //   if (!email) newErrors.email = 'Email is required';
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
+
   const handleSubmit = (e) => {
+    console.log("submit clicked")
+
     e.preventDefault();
+
+    if (!name) {
+      window.alert('Name is required');
+      return;
+    }
+
+    if (!email) {
+      window.alert('Email is required');
+      return;
+    }
+
     const selectedValues = {
       region: selectedRegions,
       estuaryclass: selectedEstuaryClasses,
@@ -108,8 +137,9 @@ const QueryForm = () => {
       estuaryname: selectedEstuaries,
       dtype: selectedDtypes,
       projectid: selectedProjectID,
-      year: selectedYear
-
+      year: selectedYear,
+      user_name: name,
+      user_email: email
     };
     console.log(selectedValues)
     
@@ -142,7 +172,7 @@ const QueryForm = () => {
   };
 
   return (
-    <div className="form-container">
+    <div className="form-container w-100">
       {loading && (
         <>
           <div className="loader-overlay"></div>
@@ -151,7 +181,29 @@ const QueryForm = () => {
           </div>
         </>
       )}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="p-4 bg-light shadow rounded">
+        <div className="mb-3">
+          <label htmlFor="name" className="form-label">Name</label>
+          <input
+            type="text"
+            id="name"
+            className="form-control"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">Email</label>
+          <input
+            type="email"
+            id="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
         <DropDownSelector
           label="Select Region"
           options={regions}
@@ -186,13 +238,13 @@ const QueryForm = () => {
           label="Select ProjectID"
           options={projectid}
           selectedValues={selectedProjectID}
-          onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'projectid')}
+          onChange={(values) => handleDropdownChange(values, setSelectedProjectID, 'projectid')}
         />
         <DropDownSelector
           label="Select Year"
           options={year}
           selectedValues={selectedYear}
-          onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'year')}
+          onChange={(values) => handleDropdownChange(values, setSelectedYear, 'year')}
         />
         <DropDownSelector
           label="Select SOP to download data"
@@ -200,11 +252,12 @@ const QueryForm = () => {
           selectedValues={selectedDtypes}
           onChange={(values) => handleDropdownChange(values, setSelectedDtypes, 'dtype')}
         />
-        <div>
-          <button type="submit">Download Data</button>
-          <button type="button" onClick={handleReset}>Reset</button>
-          <button type="button">Map - available soon</button>
-          <button type="button">Analysis - available soon</button>
+        <div className="d-flex gap-2">
+          <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Download Data</button>
+          <br></br>
+          <button type="button" className="btn btn-primary" onClick={handleReset}>Reset</button>
+          {/* <button type="button" className="btn btn-secondary">Map - available soon</button>
+          <button type="button" className="btn btn-secondary">Analysis - available soon</button> */}
         </div>
       </form>
     </div>

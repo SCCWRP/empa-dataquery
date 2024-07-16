@@ -49,8 +49,12 @@ def download_data():
     dtypes = cleaned_data.pop('dtype', None)
     projectids = cleaned_data.pop('projectid', None)
     years = cleaned_data.pop('year', None)
+    user_name = cleaned_data.pop('user_name', None)
+    user_email = cleaned_data.pop('user_email', None)
+    
     projectids = "'" + "','".join(projectids) + "'"
     years = "'" + "','".join(years) + "'"
+
 
     # Build WHERE clause
     where_conditions = []
@@ -69,7 +73,7 @@ def download_data():
     
     excel_files = []
     xml_files = []
-
+    projectid_list = []
     for dtype in dtypes:
         true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
         tbls = current_app.datasets.get(true_dtype, [])
@@ -107,6 +111,8 @@ def download_data():
                             *['region','estuaryclass','mpastatus','estuarytype']
                         ]
                     ]
+                    projectid_list.extend(set(df['projectid'].tolist()))
+
                     df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
         excel_files.append(excel_file_path)
         
@@ -115,10 +121,16 @@ def download_data():
         
         # Look for matching XML files in the metadata_files folder
         metadata_files_path = os.path.join(export_path, "metadata_files")
+        projectid_list = list(set(projectid_list))
+        # Iterate over the files in the metadata directory
         for file in os.listdir(metadata_files_path):
             if file.endswith(".xml") and metadata_type in file:
-                metadata_file_path = os.path.join(metadata_files_path, file)
-                xml_files.append(metadata_file_path)
+                # Check if any of the project IDs are in the filename
+                print(file)
+                print(projectid_list)
+                if any(projectid.replace("'","") in file for projectid in projectid_list):
+                    metadata_file_path = os.path.join(metadata_files_path, file)
+                    xml_files.append(metadata_file_path)
 
     zip_file_path = f'{export_path}/data-{requestid}.zip'
     with ZipFile(zip_file_path, 'w') as zipf:
@@ -132,7 +144,8 @@ def download_data():
     data_receipt(
         send_from = current_app.mail_from,
         always_send_to = current_app.maintainers,
-        login_email = 'duyn@sccwrp.org',
+        login_name = user_name,
+        login_email = user_email,
         dtype = dtypes,
         region = region,
         estuaryclass = estuaryclass,
