@@ -78,6 +78,11 @@ def download_data():
         true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
         tbls = current_app.datasets.get(true_dtype, [])
         excel_file_path = os.path.join(export_path, f'{true_dtype}.xlsx')
+
+        date_col_name = 'samplecollectiondate' if dtype != 'SOP 15: Trash and microplastics' else 'sampledate'
+        print(dtype)
+        print(date_col_name)
+        
         with pd.ExcelWriter(excel_file_path) as writer:
             for tbl in tbls:
                 pkey = get_primary_key(tbl, g.eng)
@@ -100,7 +105,7 @@ def download_data():
                         JOIN search s ON t.estuaryname = s.estuaryname AND t.siteid = s.siteid
                     """
                     if where_clause:
-                        query += f" WHERE {where_clause} AND t.projectid in ({projectids}) AND EXTRACT(YEAR FROM t.samplecollectiondate) IN ({years})"
+                        query += f" WHERE {where_clause} AND t.projectid in ({projectids}) AND EXTRACT(YEAR FROM t.{date_col_name}) IN ({years})"
                     print(query)
                     df = pd.read_sql(query, g.eng)                        
                     # arrange columns
