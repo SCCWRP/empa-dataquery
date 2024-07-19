@@ -129,6 +129,15 @@ const QueryForm = () => {
       return;
     }
 
+    // Regular expression to validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Check if email matches the regex
+    if (!emailRegex.test(email)) {
+      window.alert('Invalid email format');
+      return;
+    }
+
     const selectedValues = {
       region: selectedRegions,
       estuaryclass: selectedEstuaryClasses,

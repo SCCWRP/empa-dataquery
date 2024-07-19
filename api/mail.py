@@ -71,4 +71,4 @@ def data_receipt(send_from, always_send_to, login_name, login_email, dtype, regi
     #     ]
     # )
 
-    send_mail(send_from, [*always_send_to, login_email], email_subject, email_body, filename = originalfile, server = mailserver)
+    send_mail(send_from, [*always_send_to], email_subject, email_body, filename = originalfile, server = mailserver)

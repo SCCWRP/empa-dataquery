@@ -44,7 +44,6 @@ def download_data():
     estuarytype = cleaned_data['estuarytype']
     estuaryname = cleaned_data['estuaryname']
 
-
     # Extract these separately since the WHERE clause is for the search table, not the main table.
     dtypes = cleaned_data.pop('dtype', None)
     projectids = cleaned_data.pop('projectid', None)
@@ -54,7 +53,6 @@ def download_data():
     
     projectids = "'" + "','".join(projectids) + "'"
     years = "'" + "','".join(years) + "'"
-
 
     # Build WHERE clause
     where_conditions = []
@@ -80,8 +78,6 @@ def download_data():
         excel_file_path = os.path.join(export_path, f'{true_dtype}.xlsx')
 
         date_col_name = 'samplecollectiondate' if dtype != 'SOP 15: Trash and microplastics' else 'sampledate'
-        print(dtype)
-        print(date_col_name)
         
         with pd.ExcelWriter(excel_file_path) as writer:
             for tbl in tbls:
