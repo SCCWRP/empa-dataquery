@@ -155,7 +155,8 @@ def download_data():
         estuaryname = estuaryname,
         projectid = projectids,
         year = years,
-        originalfile = zip_file_path,
+        #originalfile = zip_file_path,
+        originalfile = None,
         eng = g.eng,
         mailserver = current_app.config['MAIL_SERVER']
     )
