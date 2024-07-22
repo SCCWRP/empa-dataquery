@@ -124,6 +124,12 @@ const QueryForm = () => {
       return;
     }
 
+    const regex = /^[a-zA-Z_ ]+$/;
+    if (!regex.test(name)) {
+      window.alert('Invalid name. Only alphabetic characters, spaces, and underscores are allowed.');
+      return;
+    }
+
     if (!email) {
       window.alert('Email is required');
       return;
