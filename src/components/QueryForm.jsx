@@ -192,8 +192,8 @@ const QueryForm = () => {
         <>
           <div className="loader-overlay"></div>
           <div className="loader-container">
-            {/* <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" /> */}
-            <img src='https://empachecker.sccwrp.org/empadataquery/assets/loader.gif' alt="Loading..." />
+            <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" />
+            {/* <img src='https://empachecker.sccwrp.org/empadataquery/assets/loader.gif' alt="Loading..." /> */}
           </div>
         </>
       )}
