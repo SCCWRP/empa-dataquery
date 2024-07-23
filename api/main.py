@@ -19,6 +19,11 @@ def main(path):
 def icon():
     return send_from_directory('static','icons/orange.png')
 
+# Route to serve loader.gif
+@homepage.route('/assets/<filename>', methods=['GET'])
+def serve_asset(filename):
+    return send_from_directory('static', f'icons/{filename}')
+
 
 @homepage.errorhandler(Exception)
 def homepage_error_handler(error):

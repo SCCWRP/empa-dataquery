@@ -3,6 +3,8 @@ import axios from 'axios';
 import DropDownSelector from './DropDown';
 import { TailSpin } from 'react-loader-spinner';
 import 'bootstrap/dist/css/bootstrap.min.css';
+//import loadingGif from '../assets/loader.gif'; // Adjust the path according to your directory structure
+
 
 const QueryForm = () => {
   const [regions, setRegions] = useState([]);
@@ -106,13 +108,11 @@ const QueryForm = () => {
     fetchDropdownData(); // Re-fetch initial data
   };
 
-  // const validateForm = () => {
-  //   const newErrors = {};
-  //   if (!name) newErrors.name = 'Name is required';
-  //   if (!email) newErrors.email = 'Email is required';
-  //   setErrors(newErrors);
-  //   return Object.keys(newErrors).length === 0;
-  // };
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleModalToggle = () => {
+    setModalOpen(!modalOpen);
+  };
 
   const handleSubmit = (e) => {
     console.log("submit clicked")
@@ -192,13 +192,37 @@ const QueryForm = () => {
         <>
           <div className="loader-overlay"></div>
           <div className="loader-container">
-            <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" />
+            {/* <TailSpin height="80" width="80" color="#3498db" ariaLabel="loading" /> */}
+            <img src='https://empachecker.sccwrp.org/empadataquery/assets/loader.gif' alt="Loading..." />
           </div>
         </>
       )}
       <form onSubmit={handleSubmit} className="p-4 bg-light shadow rounded">
+        <h2 className="form-title">EMPA Advanced Query Tool</h2>
+
+        <div className="form-button-container">
+            <button type="button" className="btn btn-secondary" onClick={handleModalToggle}>
+              Click to view the instruction
+            </button>
+        </div>
+        {modalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>Instructions</h3>
+              <ul>
+                <li>Filter your data using the dropdowns.</li>
+                <li>Upon pressing the Download Data button, you will get data in .xlsx files and corresponding FGDC metadata in XML files.</li>
+                <li>Contact Paul Smith pauls@sccwrp.org or Duy Nguyen duyn@sccwrp.org for assistance in case there is an error.</li>
+              </ul>
+              <button type="button" className="btn btn-primary" onClick={handleModalToggle}>
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mb-3">
-          <label htmlFor="name" className="form-label">Name</label>
+          <label htmlFor="name" className="form-label">Enter Your Name: </label>
           <input
             type="text"
             id="name"
@@ -209,7 +233,7 @@ const QueryForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email</label>
+          <label htmlFor="email" className="form-label">Enter Your Email: </label>
           <input
             type="email"
             id="email"
@@ -219,48 +243,56 @@ const QueryForm = () => {
             required
           />
         </div>
+        <label htmlFor="region" className="form-label">Select Region: </label>
         <DropDownSelector
           label="Select Region"
           options={regions}
           selectedValues={selectedRegions}
           onChange={(values) => handleDropdownChange(values, setSelectedRegions, 'region')}
         />
+        <label htmlFor="estuaryclasses" className="form-label">Select Estuary Class:</label>
         <DropDownSelector
           label="Select Estuary Classes"
           options={estuaryClasses}
           selectedValues={selectedEstuaryClasses}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaryClasses, 'estuary_class')}
         />
+        <label htmlFor="mpastatus" className="form-label">Select MPA Status:</label>
         <DropDownSelector
           label="Select MPA Status"
           options={mpaStatuses}
           selectedValues={selectedMpaStatuses}
           onChange={(values) => handleDropdownChange(values, setSelectedMpaStatuses, 'mpa_status')}
         />
+        <label htmlFor="estuarytypes" className="form-label">Select Estuary Type:</label>
         <DropDownSelector
           label="Select Estuary Types"
           options={estuaryTypes}
           selectedValues={selectedEstuaryTypes}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaryTypes, 'estuary_type')}
         />
+        <label htmlFor="estuaries" className="form-label">Select Estuary:</label>
         <DropDownSelector
           label="Select Estuaries"
           options={estuaries}
           selectedValues={selectedEstuaries}
           onChange={(values) => handleDropdownChange(values, setSelectedEstuaries, 'estuary')}
         />
+        <label htmlFor="projectids" className="form-label">Select ProjectID:</label>
         <DropDownSelector
           label="Select ProjectID"
           options={projectid}
           selectedValues={selectedProjectID}
           onChange={(values) => handleDropdownChange(values, setSelectedProjectID, 'projectid')}
         />
+        <label htmlFor="years" className="form-label">Select Year:</label>
         <DropDownSelector
           label="Select Year"
           options={year}
           selectedValues={selectedYear}
           onChange={(values) => handleDropdownChange(values, setSelectedYear, 'year')}
         />
+        <label htmlFor="sops" className="form-label">Select SOP:</label>
         <DropDownSelector
           label="Select SOP to download data"
           options={dtypes}

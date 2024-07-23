@@ -55,15 +55,21 @@ const DropDownSelector = ({ label, options, selectedValues, onChange }) => {
     <>
       {isOpen && <div className="custom-dropdown-overlay"></div>}
       <div className="custom-dropdown">
-        <button
-          type="button"
+        <div
           className="custom-dropdown-toggle"
           onClick={handleToggleDropdown}
         >
-          {label}
-        </button>
-        <div className="selected-values">
-          {selectedValues.join(', ') || 'None'}
+          <div className="selected-values">
+            {localSelectedValues.length > 0 ? (
+              localSelectedValues.map((value) => (
+                <span key={value} className="selected-value-bubble">
+                  {value}
+                </span>
+              ))
+            ) : (
+              <span className="placeholder">{label}</span>
+            )}
+          </div>
         </div>
         {isOpen && (
           <div className="custom-dropdown-container" ref={dropdownRef}>
