@@ -3,7 +3,6 @@ import axios from 'axios';
 import DropDownSelector from './DropDown';
 import { TailSpin } from 'react-loader-spinner';
 import 'bootstrap/dist/css/bootstrap.min.css';
-//import loadingGif from '../assets/loader.gif'; // Adjust the path according to your directory structure
 
 
 const QueryForm = () => {
@@ -29,6 +28,10 @@ const QueryForm = () => {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [affiliation, setAffiliation] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [affiliationError, setAffiliationError] = useState('');
 
 
   const fetchDropdownData = (params = {}) => {
@@ -71,6 +74,35 @@ const QueryForm = () => {
   useEffect(() => {
     fetchDropdownData();
   }, []);
+  useEffect(() => {
+    if (!name) {
+      setNameError('Name is required');
+    } else if (!/^[a-zA-Z_ ]+$/.test(name)) {
+      setNameError('Invalid value. Only alphabetic characters, spaces, and underscores are allowed.');
+    } else {
+      setNameError('');
+    }
+  }, [name]);
+
+  useEffect(() => {
+    if (!affiliation) {
+      setAffiliationError('Affiliation is required');
+    } else if (!/^[a-zA-Z_ ]+$/.test(affiliation)) {
+      setAffiliationError('Invalid value. Only alphabetic characters, spaces, and underscores are allowed.');
+    } else {
+      setAffiliationError('');
+    }
+  }, [affiliation]);
+
+  useEffect(() => {
+    if (!email) {
+      setEmailError('Email is required');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
+  }, [email]);
 
   const handleDropdownChange = (selectedValues, dropdownSetter, type) => {
     dropdownSetter(selectedValues);
@@ -104,6 +136,7 @@ const QueryForm = () => {
     setSelectedYear([]);
     setName('');
     setEmail('');
+    setAffiliation('');
 
     fetchDropdownData(); // Re-fetch initial data
   };
@@ -123,10 +156,19 @@ const QueryForm = () => {
       window.alert('Name is required');
       return;
     }
+    if (!affiliation) {
+      window.alert('Affiliation is required');
+      return;
+    }
 
     const regex = /^[a-zA-Z_ ]+$/;
     if (!regex.test(name)) {
-      window.alert('Invalid name. Only alphabetic characters, spaces, and underscores are allowed.');
+      window.alert('Invalid value. Only alphabetic characters, spaces, and underscores are allowed.');
+      return;
+    }
+
+    if (!regex.test(affiliation)) {
+      window.alert('Invalid value. Only alphabetic characters, spaces, and underscores are allowed.');
       return;
     }
 
@@ -154,7 +196,8 @@ const QueryForm = () => {
       projectid: selectedProjectID,
       year: selectedYear,
       user_name: name,
-      user_email: email
+      user_email: email,
+      user_affiliation: affiliation
     };
     console.log(selectedValues)
     
@@ -222,7 +265,7 @@ const QueryForm = () => {
         )}
 
         <div className="mb-3">
-          <label htmlFor="name" className="form-label">Enter Your Name: </label>
+          <label htmlFor="name" className="form-label">Enter Your Name <span style={{ color: 'red' }}>(required)</span>: </label>
           <input
             type="text"
             id="name"
@@ -233,13 +276,24 @@ const QueryForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">Enter Your Email: </label>
+          <label htmlFor="email" className="form-label">Enter Your Email <span style={{ color: 'red' }}>(required)</span>: </label>
           <input
             type="email"
             id="email"
             className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="affiliation" className="form-label">Enter Your Affiliation <span style={{ color: 'red' }}>(required)</span>: </label>
+          <input
+            type="affiliation"
+            id="affiliation"
+            className="form-control"
+            value={affiliation}
+            onChange={(e) => setAffiliation(e.target.value)}
             required
           />
         </div>

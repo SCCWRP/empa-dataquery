@@ -87,13 +87,13 @@ def error_handler(f):
             current_app.logger.error(traceback.format_exc())
 
             # Send an error email
-            err_msg = f"THERE WAS A CRITICAL ERROR:\n {e}\n {request.get_json()}"
+            err_msg = f"THERE WAS A CRITICAL ERROR. SEE BELOW:\n\n\n {e}\n {request.get_json()}"
             send_mail(
-                current_app.mail_from, 
-                current_app.maintainers, 
-                'EMPA Advanced Data Query ERROR', 
-                err_msg, 
-                filename=None, 
+                current_app.mail_from,
+                current_app.maintainers,
+                'EMPA Advanced Data Query ERROR',
+                err_msg,
+                filename=None,
                 server=current_app.config['MAIL_SERVER']
             )
 
