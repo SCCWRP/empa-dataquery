@@ -203,29 +203,33 @@ const QueryForm = () => {
     
     setLoading(true);
 
-    axios.post('/empadataquery/downloaddata', selectedValues, { responseType: 'blob' })
+    axios.post('/empadataquery/downloaddata', selectedValues)
     .then(response => {
-      console.log(response.status)
       if (response.status === 200) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const { sql_queries, message, filename } = response.data;
+        console.log(response.data)
+        console.log("sql_queries")
+        console.log(sql_queries)
+
+        // Automatically trigger the file download
         const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'data.zip');
+        link.href = `/empadataquery/downloadfile/${filename}`;
+        link.setAttribute('download', filename);
         document.body.appendChild(link);
         link.click();
         link.remove();
+
       } else {
-        alert('Unexpected Error Occured. Please contact Duy Nguyen duyn@sccwrp.org for assistance');
+        alert('Unexpected Error Occured. Please contact support.');
       }
     })
     .catch(error => {
-      alert('Unexpected Error Occured. Please contact Duy Nguyen duyn@sccwrp.org for assistance');
+      alert('Unexpected Error Occured. Please contact support.');
       console.error('Error submitting data:', error);
     })
     .finally(() => {
       setLoading(false); // Stop loading
     });
-  
 
   };
 

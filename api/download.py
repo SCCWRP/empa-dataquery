@@ -77,6 +77,8 @@ def download_data():
     excel_files = []
     xml_files = []
     projectid_list = []
+    sql_queries = []
+
     for dtype in dtypes:
         true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
         tbls = current_app.datasets.get(true_dtype, [])
@@ -108,6 +110,7 @@ def download_data():
                     if where_clause:
                         query += f" WHERE {where_clause} AND t.projectid in ({projectids}) AND EXTRACT(YEAR FROM t.{date_col_name}) IN ({years})"
                     print(query)
+                    sql_queries.append(query)
                     df = pd.read_sql(query, eng)                        
                     # arrange columns
                     df = df[
@@ -224,5 +227,22 @@ def download_data():
         mailserver = current_app.config['MAIL_SERVER']
     )
 
-    return send_file(zip_file_path, as_attachment=True, download_name=f'data-{requestid}.zip')
+    joined_sql_queries = "; ".join(sql_queries)
+
+    # Return the list of SQL queries along with other information
+    return jsonify({
+        'sql_queries': joined_sql_queries,
+        'message': 'Data download initiated successfully.',
+        'filename': f'data-{requestid}.zip'
+    })
+
+
+@download.route('/downloadfile/<filename>', methods=['GET'])
+def download_file(filename):
+    export_path = os.path.join(os.getcwd(), "api", "export")
+    file_path = os.path.join(export_path, filename)
     
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        return jsonify({'message': 'File not found.'}), 404
