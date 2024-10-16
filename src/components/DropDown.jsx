@@ -59,17 +59,22 @@ const DropDownSelector = ({ label, options, selectedValues, onChange }) => {
           className="custom-dropdown-toggle"
           onClick={handleToggleDropdown}
         >
-          <div className="selected-values">
-            {localSelectedValues.length > 0 ? (
-              localSelectedValues.map((value) => (
+        <div className="selected-values">
+          {localSelectedValues.length > 0 ? (
+            <>
+              {localSelectedValues.slice(0, 5).map((value) => (
                 <span key={value} className="selected-value-bubble">
                   {value}
                 </span>
-              ))
-            ) : (
-              <span className="placeholder">{label}</span>
-            )}
-          </div>
+              ))}
+              {localSelectedValues.length > 5 && (
+                <span className="more-values">... and {localSelectedValues.length - 5} more</span>
+              )}
+            </>
+          ) : (
+            <span className="placeholder">{label}</span>
+          )}
+        </div>
         </div>
         {isOpen && (
           <div className="custom-dropdown-container" ref={dropdownRef}>
