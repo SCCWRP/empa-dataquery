@@ -207,25 +207,26 @@ def download_data():
     cursor.close()
     conn.close()
 
-    data_receipt(
-        send_from = current_app.mail_from,
-        always_send_to = current_app.maintainers,
-        login_name = user_name,
-        login_email = user_email,
-        login_affiliation = user_affiliation,
-        dtype = dtypes,
-        region = region,
-        estuaryclass = estuaryclass,
-        mpastatus = mpastatus,
-        estuarytype = estuarytype,
-        estuaryname = estuaryname,
-        projectid = projectids,
-        year = years,
-        #originalfile = zip_file_path,
-        originalfile = None,
-        eng = g.eng,
-        mailserver = current_app.config['MAIL_SERVER']
-    )
+    if user_email != 'test@sccwrp.org':
+        data_receipt(
+            send_from = current_app.mail_from,
+            always_send_to = current_app.maintainers,
+            login_name = user_name,
+            login_email = user_email,
+            login_affiliation = user_affiliation,
+            dtype = dtypes,
+            region = region,
+            estuaryclass = estuaryclass,
+            mpastatus = mpastatus,
+            estuarytype = estuarytype,
+            estuaryname = estuaryname,
+            projectid = projectids,
+            year = years,
+            #originalfile = zip_file_path,
+            originalfile = None,
+            eng = g.eng,
+            mailserver = current_app.config['MAIL_SERVER']
+        )
 
     joined_sql_queries = "; ".join(sql_queries)
 
