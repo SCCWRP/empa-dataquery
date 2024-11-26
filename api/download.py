@@ -112,17 +112,23 @@ def download_data():
                     print(query)
                     sql_queries.append(query)
                     df = pd.read_sql(query, eng)                        
-                    # arrange columns
-                    df = df[
-                        [   
-                            *['objectid'],
-                            *[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)],
-                            *['region','estuaryclass','mpastatus','estuarytype']
+                    # Check if DataFrame is empty
+                    if df.empty:
+                        # Write "DATA-N/A" in the Excel sheet if DataFrame is empty
+                        empty_df = pd.DataFrame({'DATA_NOT_AVAILABLE_FOR_CURRENT_SELECTIONS': []})
+                        empty_df.to_excel(writer, sheet_name=tbl, index=False)
+                    else:
+                        # Arrange columns and process the DataFrame
+                        df = df[
+                            [   
+                                *['objectid'],
+                                *[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)],
+                                *['region', 'estuaryclass', 'mpastatus', 'estuarytype']
+                            ]
                         ]
-                    ]
-                    projectid_list.extend(set(df['projectid'].tolist()))
+                        projectid_list.extend(set(df['projectid'].tolist()))
 
-                    df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
+                        df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
         excel_files.append(excel_file_path)
         
         # Get the metadata type from META_DICT

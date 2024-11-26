@@ -33,6 +33,10 @@ const QueryForm = () => {
   const [emailError, setEmailError] = useState('');
   const [affiliationError, setAffiliationError] = useState('');
 
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(true);
+  const closeWelcomeModal = () => setWelcomeModalOpen(false);
+
+
 
   const fetchDropdownData = (params = {}) => {
     setLoading(true);
@@ -244,6 +248,31 @@ const QueryForm = () => {
           </div>
         </>
       )}
+      {welcomeModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Welcome to the EMPA Advanced Query Tool</h3>
+              <p style={{ textAlign: 'left' }}>
+                The California Estuarine Marine Protected Area (EMPA) Monitoring Program is an ongoing effort to assess the quality and 
+                condition of estuaries statewide. The program goals are to monitor California estuaries with a standard, comprehensive function-based 
+                assessment framework to determine the health of Californias estuaries. 
+                Partners in the program have developed an assessment framework, standard monitoring protocols, data structures, and quality control measures.
+                The Program includes the compilation and analysis of select, currently available data sets and a focused field data collection effort to fill 
+                data gaps through implementation of standard protocols. 
+              </p>
+              <p style={{ textAlign: 'left' }}>
+                The Advanced Query Tool allows users to access data from all projects that are following the EMPA standard protocols. 
+                Data in the portal consists of a variety of projects. Additional project information is available on the EMPA website 
+                <a href='https://empa.sccwrp.org' target='_blank'>(https://empa.sccwrp.org)</a>. Each dataset is accompanied by corresponding FGDC metadata in XML files. For program and general questions, 
+                contact Dr. Jan Walker (janw@sccwrp.org).
+              </p>
+            <button type="button" className="btn btn-primary" onClick={closeWelcomeModal}>
+              Get Started
+            </button>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="p-4 bg-light shadow rounded">
         <h2 className="form-title">EMPA Advanced Query Tool</h2>
 
@@ -256,11 +285,12 @@ const QueryForm = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <h3>Instructions</h3>
-              <ul>
-                <li>Filter your data using the dropdowns.</li>
-                <li>Upon pressing the Download Data button, you will get data in .xlsx files and corresponding FGDC metadata in XML files.</li>
-                <li>Contact Paul Smith pauls@sccwrp.org or Duy Nguyen duyn@sccwrp.org for assistance in case there is an error.</li>
-              </ul>
+              <ol style={{ textAlign: 'left' }}>
+                <li>Fill in your contact information.</li>
+                <li>Filter the data by using the dropdown menus. Selections can be turned on and off by either individually selecting categories or by selecting/deselecting all. Once a selection has been made, then select Confirm.</li>
+                <li>Select Download Data. Once the Download Data button is selected, a folder will be downloaded to your local device. Within the folder, each dataset will be delivered as a .xlsx file and corresponding FGDC metadata as an XML file. </li>
+                <li>For assistance, contact Paul Smith (pauls@sccwrp.org) or Duy Nguyen (duyn@sccwrp.org).</li>
+              </ol>
               <button type="button" className="btn btn-primary" onClick={handleModalToggle}>
                 Close
               </button>
