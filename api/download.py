@@ -84,7 +84,7 @@ def download_data():
         tbls = current_app.datasets.get(true_dtype, [])
         excel_file_path = os.path.join(export_path, f'{true_dtype}.xlsx')
 
-        date_col_name = 'samplecollectiondate' if dtype != 'SOP 15: Trash and microplastics' else 'sampledate'
+        date_col_name = 'samplecollectiondate'
         
         with pd.ExcelWriter(excel_file_path) as writer:
             for tbl in tbls:
