@@ -24,13 +24,8 @@ const DropDownSelector = ({ label, options, selectedValues, onChange }) => {
     setLocalSelectedValues([]);
   };
 
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      alert('Please press Confirm when you are done');
-    }
-  };
-
-  const handleClose = () => {
+  // Common function to close the dropdown (like clicking outside or on the X button)
+  const handleCloseDropdown = () => {
     if (localSelectedValues.length === 0) {
       alert('You need to choose at least one option');
     } else {
@@ -40,13 +35,21 @@ const DropDownSelector = ({ label, options, selectedValues, onChange }) => {
     }
   };
 
+  // When clicking outside, auto-apply the selection (if at least one option is selected)
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      handleCloseDropdown();
+    }
+  };
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [localSelectedValues]);
 
+  // Update local state if the parent passes a new selection
   useEffect(() => {
     setLocalSelectedValues(selectedValues);
   }, [selectedValues]);
@@ -55,42 +58,64 @@ const DropDownSelector = ({ label, options, selectedValues, onChange }) => {
     <>
       {isOpen && <div className="custom-dropdown-overlay"></div>}
       <div className="custom-dropdown">
-        <div
-          className="custom-dropdown-toggle"
-          onClick={handleToggleDropdown}
-        >
-        <div className="selected-values">
-          {localSelectedValues.length > 0 ? (
-            <>
-              {localSelectedValues.slice(0, 5).map((value) => (
-                <span key={value} className="selected-value-bubble">
-                  {value}
-                </span>
-              ))}
-              {localSelectedValues.length > 5 && (
-                <span className="more-values">... and {localSelectedValues.length - 5} more</span>
-              )}
-            </>
-          ) : (
-            <span className="placeholder">{label}</span>
-          )}
-        </div>
+        <div className="custom-dropdown-toggle" onClick={handleToggleDropdown}>
+          <div className="selected-values">
+            {localSelectedValues.length > 0 ? (
+              <>
+                {localSelectedValues.slice(0, 5).map((value) => (
+                  <span key={value} className="selected-value-bubble">
+                    {value}
+                  </span>
+                ))}
+                {localSelectedValues.length > 5 && (
+                  <span className="more-values">
+                    ... and {localSelectedValues.length - 5} more
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="placeholder">{label}</span>
+            )}
+          </div>
         </div>
         {isOpen && (
           <div className="custom-dropdown-container" ref={dropdownRef}>
+            {/* X icon as a small button on the top right with a light blue background and white icon */}
+            <button
+              type="button"
+              className="close-icon"
+              onClick={handleCloseDropdown}
+              style={{
+                cursor: 'pointer',
+                position: 'absolute',
+                top: '5px',
+                right: '5px',
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                border: '1px solid #ccc',
+                backgroundColor: 'lightblue',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                lineHeight: '16px',
+                padding: 0
+              }}
+            >
+              ×
+            </button>
             <div className="custom-dropdown-menu">
               <div className="custom-dropdown-actions">
-                <button
-                  type="button"
-                  className="custom-dropdown-close"
-                  onClick={handleClose}
-                >
-                  Confirm
+                <button type="button" onClick={handleSelectAll}>
+                  Select All
                 </button>
-                <button type="button" onClick={handleSelectAll}>Select All</button>
-                <button type="button" onClick={handleDeselectAll}>Deselect All</button>
+                <button type="button" onClick={handleDeselectAll}>
+                  Deselect All
+                </button>
               </div>
-
+              {/* Always render all options, regardless of selection */}
               {options.map((option) => (
                 <label key={option} className="custom-dropdown-option">
                   <input

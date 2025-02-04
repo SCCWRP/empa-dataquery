@@ -61,11 +61,12 @@ const QueryForm = () => {
         setSelectedEstuaries(data.estuaries);
         setSelectedProjectID(data.projectids);
         setSelectedYear(data.years);
+        setSelectedDtypes(data.dtypes);
+        // Automatically select the first five options for SOP on initial load
+        // if (Object.keys(params).length === 0) {
+        //   setSelectedDtypes(data.dtypes.length > 0 ? data.dtypes.slice(0, 5) : []);
+        // }
 
-        // Automatically select all options for initial load
-        if (Object.keys(params).length === 0) {
-          setSelectedDtypes(data.dtypes.length > 0 ? [data.dtypes[0]] : []);
-        }
       })
       .catch(error => {
         console.error('Error fetching dropdown data:', error);
