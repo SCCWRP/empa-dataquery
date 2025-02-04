@@ -34,6 +34,32 @@ META_DICT = {
 }
 
 
+
+def get_column_comments(table_name, eng, schema='sde'):
+    """
+    Retrieve a dictionary mapping column names to comments for the given table.
+    Adjust the schema name if needed.
+    """
+    sql = f"""
+    SELECT 
+        a.attname AS column_name, 
+        pg_catalog.col_description(a.attrelid, a.attnum) AS column_comment
+    FROM 
+        pg_catalog.pg_attribute a
+    JOIN 
+        pg_catalog.pg_class c ON a.attrelid = c.oid
+    JOIN 
+        pg_catalog.pg_namespace n ON c.relnamespace = n.oid
+    WHERE 
+        c.relname = '{table_name}'
+        AND n.nspname = '{schema}'  -- change this if needed
+        AND a.attnum > 0 
+        AND NOT a.attisdropped;
+    """
+    # Return a dictionary: {column_name: column_comment}
+    df_comments = pd.read_sql(sql, eng)
+    return df_comments.set_index("column_name")["column_comment"].to_dict()
+
 download = Blueprint('download', __name__, template_folder = 'templates')
 @download.route('/downloaddata', methods = ['GET','POST'])
 def download_data():
@@ -86,49 +112,77 @@ def download_data():
 
         date_col_name = 'samplecollectiondate'
         
-        with pd.ExcelWriter(excel_file_path) as writer:
+        # Use xlsxwriter engine to allow adding comments to header cells
+        with pd.ExcelWriter(excel_file_path, engine="xlsxwriter") as writer:
+            workbook = writer.book  # Get the workbook object
+
             for tbl in tbls:
                 pkey = get_primary_key(tbl, eng)
                 if tbl == 'tbl_protocol_metadata':
                     continue
-                else:
-                    cols = pd.read_sql(f"""
-                        SELECT column_name 
-                        FROM column_order 
-                        WHERE table_name = '{tbl}' 
-                        ORDER BY custom_column_position
-                    """, eng).column_name.tolist()
-                    query = f"""
-                        SELECT t.*,
+
+                # Get the custom column order from your table 'column_order'
+                cols = pd.read_sql(f"""
+                    SELECT column_name 
+                    FROM column_order 
+                    WHERE table_name = '{tbl}' 
+                    ORDER BY custom_column_position
+                """, eng).column_name.tolist()
+
+                # Build the main query for the table
+                query = f"""
+                    SELECT t.*,
                         s.region,
                         s.estuaryclass,
                         s.mpastatus,
                         s.estuarytype
-                        FROM {tbl} t
-                        JOIN search s ON t.estuaryname = s.estuaryname AND t.siteid = s.siteid
-                    """
-                    if where_clause:
-                        query += f" WHERE {where_clause} AND t.projectid in ({projectids}) AND EXTRACT(YEAR FROM t.{date_col_name}) IN ({years})"
-                    print(query)
-                    sql_queries.append(query)
-                    df = pd.read_sql(query, eng)                        
-                    # Check if DataFrame is empty
-                    if df.empty:
-                        # Write "DATA-N/A" in the Excel sheet if DataFrame is empty
-                        empty_df = pd.DataFrame({'DATA_NOT_AVAILABLE_FOR_CURRENT_SELECTIONS': []})
-                        empty_df.to_excel(writer, sheet_name=tbl, index=False)
-                    else:
-                        # Arrange columns and process the DataFrame
-                        df = df[
-                            [   
-                                *['objectid'],
-                                *[col for col in cols if (col in list(df.columns)) and (col not in current_app.system_fields)],
-                                *['region', 'estuaryclass', 'mpastatus', 'estuarytype']
-                            ]
-                        ]
-                        projectid_list.extend(set(df['projectid'].tolist()))
+                    FROM {tbl} t
+                    JOIN search s ON t.estuaryname = s.estuaryname AND t.siteid = s.siteid
+                """
+                if where_clause:
+                    query += (
+                        f" WHERE {where_clause} AND t.projectid in ({projectids}) "
+                        f"AND EXTRACT(YEAR FROM t.{date_col_name}) IN ({years})"
+                    )
 
-                        df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
+                print(query)
+                sql_queries.append(query)
+                df = pd.read_sql(query, eng)
+
+                # Write to Excel (if no data, write a placeholder DataFrame)
+                if df.empty:
+                    empty_df = pd.DataFrame({'DATA_NOT_AVAILABLE_FOR_CURRENT_SELECTIONS': []})
+                    empty_df.to_excel(writer, sheet_name=tbl, index=False)
+                else:
+                    # Arrange columns as desired
+                    selected_cols = (
+                        ['objectid'] +
+                        [col for col in cols if (col in df.columns) and (col not in current_app.system_fields)] +
+                        ['region', 'estuaryclass', 'mpastatus', 'estuarytype']
+                    )
+                    df = df[selected_cols]
+                    projectid_list.extend(set(df['projectid'].tolist()))
+
+                    # Write sorted DataFrame to Excel
+                    df.sort_values(pkey).to_excel(writer, sheet_name=tbl, index=False)
+
+                    # After writing, get the worksheet object to add header comments.
+                    worksheet = writer.sheets[tbl]
+
+                    # Retrieve column comments for this table from PostgreSQL.
+                    col_comments = get_column_comments(tbl, eng, schema='sde')
+
+                    # Define comment options with a fixed width/height.
+                    # Adjust these values so that the comment box is large enough for long text.
+                    comment_options = {"width": 300, "height": 100}
+
+                    # Loop over DataFrame columns (headers are written in row 0) and add comments.
+                    for col_idx, col_name in enumerate(df.columns):
+                        comment = col_comments.get(col_name)
+                        if comment:
+                            worksheet.write_comment(0, col_idx, comment, comment_options)
+
+
         excel_files.append(excel_file_path)
         
         # Get the metadata type from META_DICT
