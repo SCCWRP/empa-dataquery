@@ -61,11 +61,11 @@ const QueryForm = () => {
         setSelectedEstuaries(data.estuaries);
         setSelectedProjectID(data.projectids);
         setSelectedYear(data.years);
-        setSelectedDtypes(data.dtypes);
+          
         // Automatically select the first five options for SOP on initial load
-        // if (Object.keys(params).length === 0) {
-        //   setSelectedDtypes(data.dtypes.length > 0 ? data.dtypes.slice(0, 5) : []);
-        // }
+        if (Object.keys(params).length === 0) {
+          setSelectedDtypes(data.dtypes.length > 0 ? data.dtypes.slice(0, 30) : []);
+        }
 
       })
       .catch(error => {
@@ -264,7 +264,7 @@ const QueryForm = () => {
               <p style={{ textAlign: 'left' }}>
                 The Advanced Query Tool allows users to access data from all projects that are following the EMPA standard protocols. 
                 Data in the portal consists of a variety of projects. Additional project information is available on the EMPA website 
-                <a href='https://empa.sccwrp.org' target='_blank'>(https://empa.sccwrp.org)</a>. Each dataset is accompanied by corresponding FGDC metadata in XML files. For program and general questions, 
+                <a href='https://empa.sccwrp.org' target='_blank'> (https://empa.sccwrp.org)</a>. Each dataset is accompanied by corresponding FGDC metadata in XML files. For program and general questions, 
                 contact Dr. Jan Walker (janw@sccwrp.org).
               </p>
             <button type="button" className="btn btn-primary" onClick={closeWelcomeModal}>
@@ -281,6 +281,10 @@ const QueryForm = () => {
             <button type="button" className="btn btn-secondary" onClick={handleModalToggle}>
               Click to view the instruction
             </button>
+            <button type="button" className="btn btn-secondary" onClick={() => setWelcomeModalOpen(true)}>
+              Click to view more information
+            </button>
+
         </div>
         {modalOpen && (
           <div className="modal-overlay">
@@ -288,7 +292,7 @@ const QueryForm = () => {
               <h3>Instructions</h3>
               <ol style={{ textAlign: 'left' }}>
                 <li>Fill in your contact information.</li>
-                <li>Filter the data by using the dropdown menus. Selections can be turned on and off by either individually selecting categories or by selecting/deselecting all. Once a selection has been made, then select Confirm.</li>
+                <li>Filter the data by using the dropdown menus. Selections can be turned on and off by either individually selecting categories or by selecting/deselecting all. Once a selection has been made, you can click the X icon to return to main menu.</li>
                 <li>Select Download Data. Once the Download Data button is selected, a folder will be downloaded to your local device. Within the folder, each dataset will be delivered as a .xlsx file and corresponding FGDC metadata as an XML file. </li>
                 <li>For assistance, contact Paul Smith (pauls@sccwrp.org) or Duy Nguyen (duyn@sccwrp.org).</li>
               </ol>
@@ -381,7 +385,7 @@ const QueryForm = () => {
           selectedValues={selectedYear}
           onChange={(values) => handleDropdownChange(values, setSelectedYear, 'year')}
         />
-        <label htmlFor="sops" className="form-label">Select SOP:</label>
+        <label htmlFor="sops" className="form-label">Select SOP (<a href="https://empa.sccwrp.org/#mp" target="_blank">SOP info</a>) :</label>
         <DropDownSelector
           label="Select SOP to download data"
           options={dtypes}
