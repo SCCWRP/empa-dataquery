@@ -9,7 +9,7 @@ homepage = Blueprint('homepage', __name__)
 # Main app page
 @homepage.route('/', defaults={'path': ''}, methods = ['GET','POST'])
 @homepage.route('/<path:path>', methods = ['GET','POST'])
-@requires_auth
+#@requires_auth
 def main(path):            
     return render_template('app.jinja2')
     
