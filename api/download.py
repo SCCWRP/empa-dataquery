@@ -193,13 +193,11 @@ def download_data():
         projectid_list = list(set(projectid_list))
         # Iterate over the files in the metadata directory
         for file in os.listdir(metadata_files_path):
-            if file.endswith(".xml") and metadata_type in file:
-                # Check if any of the project IDs are in the filename
-                print(file)
-                print(projectid_list)
-                if any(projectid.replace("'","") in file for projectid in projectid_list):
+            if file.endswith(".xml") and isinstance(metadata_type, str) and metadata_type in file:
+                if any(projectid.replace("'", "") in file for projectid in projectid_list):
                     metadata_file_path = os.path.join(metadata_files_path, file)
                     xml_files.append(metadata_file_path)
+
 
     zip_file_path = f'{export_path}/data-{requestid}.zip'
     with ZipFile(zip_file_path, 'w') as zipf:

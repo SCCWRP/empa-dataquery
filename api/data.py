@@ -65,7 +65,7 @@ def populate_dropdown():
     dtypes = []
     for x in current_app.data_config.get('DATASETS').keys():
         label = current_app.data_config.get('DATASETS').get(x).get('label')
-        if 'logger' not in label and 'toxicity' not in label:
+        if 'logger' not in label and 'toxicity' not in label and 'topography' not in label:
             dtypes.append(label) 
 
     # Create and sort the list for 'region'
