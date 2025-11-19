@@ -106,6 +106,7 @@ def download_data():
     sql_queries = []
 
     for dtype in dtypes:
+        print(f"Processing data type: {dtype}")
         true_dtype = find_key_by_label(current_app.data_config.get('DATASETS'), dtype)
         tbls = current_app.datasets.get(true_dtype, [])
         excel_file_path = os.path.join(export_path, f'{true_dtype}.xlsx')
@@ -117,6 +118,7 @@ def download_data():
             workbook = writer.book  # Get the workbook object
 
             for tbl in tbls:
+                print(f"Processing table: {tbl}")
                 pkey = get_primary_key(tbl, eng)
                 if tbl == 'tbl_protocol_metadata':
                     continue
@@ -149,6 +151,24 @@ def download_data():
                 sql_queries.append(query)
                 df = pd.read_sql(query, eng)
 
+                # Special handling for Fish Seines: add fish_or_invert column
+                if dtype == "SOP 9: Fish seines" and tbl in ['tbl_fish_abundance_data', 'tbl_fish_length_data']:
+                    if not df.empty and 'scientificname' in df.columns:
+                        # Get fish_or_invert from lu_fishmacrospecies lookup table
+                        lookup_query = "SELECT scientificname, fish_or_invert FROM lu_fishmacrospecies"
+                        lu_df = pd.read_sql(lookup_query, eng)
+                        # Merge to add fish_or_invert column
+                        df = df.merge(lu_df, on='scientificname', how='left')
+
+                # Special handling for Crab Traps: add fish_or_invert column
+                if dtype == "SOP 10: Crab traps" and tbl in ['tbl_crabfishinvert_abundance', 'tbl_crabbiomass_length']:
+                    if not df.empty and 'scientificname' in df.columns:
+                        # Get fish_or_invert from lu_fishmacrospecies lookup table
+                        lookup_query = "SELECT scientificname, fish_or_invert FROM lu_fishmacrospecies"
+                        lu_df = pd.read_sql(lookup_query, eng)
+                        # Merge to add fish_or_invert column
+                        df = df.merge(lu_df, on='scientificname', how='left')
+
                 # Write to Excel (if no data, write a placeholder DataFrame)
                 if df.empty:
                     empty_df = pd.DataFrame({'DATA_NOT_AVAILABLE_FOR_CURRENT_SELECTIONS': []})
@@ -160,6 +180,14 @@ def download_data():
                         [col for col in cols if (col in df.columns) and (col not in current_app.system_fields)] +
                         ['region', 'estuaryclass', 'mpastatus', 'estuarytype']
                     )
+                    # Add fish_or_invert if it exists (for Fish Seines tables)
+                    if 'fish_or_invert' in df.columns and 'fish_or_invert' not in selected_cols:
+                        # Insert fish_or_invert after scientificname if possible
+                        if 'scientificname' in selected_cols:
+                            sci_idx = selected_cols.index('scientificname')
+                            selected_cols.insert(sci_idx + 1, 'fish_or_invert')
+                        else:
+                            selected_cols.append('fish_or_invert')
                     df = df[selected_cols]
                     projectid_list.extend(set(df['projectid'].tolist()))
 
