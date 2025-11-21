@@ -5,7 +5,7 @@ import { TailSpin } from 'react-loader-spinner';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
-const QueryForm = () => {
+const QueryForm = ({ onNavigateToWaterQuality }) => {
   const [regions, setRegions] = useState([]);
   const [estuaryClasses, setEstuaryClasses] = useState([]);
   const [mpaStatuses, setMpaStatuses] = useState([]);
@@ -283,6 +283,16 @@ const QueryForm = () => {
             </button>
             <button type="button" className="btn btn-secondary" onClick={() => setWelcomeModalOpen(true)}>
               Click to view more information
+            </button>
+            <button type="button" className="btn btn-success" onClick={() => {
+              const password = prompt('This tool is in beta. If you would like to download Water Quality (Logger Data), please refer to empa.sccwrp.org and navigate to the ERDDAP system. Enter admin access password:');
+              if (password === '3535Harbor') {
+                onNavigateToWaterQuality();
+              } else if (password !== null) {
+                alert('Incorrect password');
+              }
+            }}>
+              Query/Visualize Water Quality (Logger Data)
             </button>
 
         </div>

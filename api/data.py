@@ -101,3 +101,197 @@ def populate_dropdown():
 
     return jsonify(data)
 
+
+@data_api.route('/wq/regions', methods=['GET'])
+def get_wq_regions():
+    """Get distinct regions from water quality data"""
+    try:
+        qry = """
+            SELECT DISTINCT region 
+            FROM mvw_qa_raw_logger_combined_final
+            WHERE region != 'Baja'
+            ORDER BY region
+        """
+        df = pd.read_sql(qry, g.eng)
+        regions = df['region'].dropna().unique().tolist()
+        return jsonify({'regions': regions})
+    except Exception as e:
+        print(f"Error fetching WQ regions: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@data_api.route('/wq/sites', methods=['GET'])
+def get_wq_sites():
+    """Get sites for a specific region"""
+    try:
+        region = request.args.get('region')
+        if not region:
+            return jsonify({'error': 'Region parameter is required'}), 400
+        
+        qry = f"""
+            SELECT DISTINCT siteid 
+            FROM mvw_qa_raw_logger_combined_final
+            WHERE region = '{region}'
+            ORDER BY siteid
+        """
+        df = pd.read_sql(qry, g.eng)
+        sites = df['siteid'].dropna().unique().tolist()
+        return jsonify({'sites': sites})
+    except Exception as e:
+        print(f"Error fetching WQ sites: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@data_api.route('/wq/parameters', methods=['GET'])
+def get_wq_parameters():
+    """Get available parameters and date ranges for a specific region and site"""
+    try:
+        region = request.args.get('region')
+        siteid = request.args.get('siteid')
+        
+        if not region or not siteid:
+            return jsonify({'error': 'Region and siteid parameters are required'}), 400
+        
+        # Get all records for this region and site to find date ranges with available data
+        qry = f"""
+            SELECT 
+                year,
+                month,
+                raw_chlorophyll,
+                raw_conductivity,
+                raw_depth,
+                raw_do,
+                raw_do_pct,
+                raw_h2otemp,
+                raw_orp,
+                raw_ph,
+                raw_pressure,
+                raw_qvalue,
+                raw_salinity,
+                raw_turbidity
+            FROM mvw_qa_raw_logger_combined_final
+            WHERE region = '{region}' AND siteid = '{siteid}'
+            ORDER BY year, month
+        """
+        df = pd.read_sql(qry, g.eng)
+        
+        # Get parameters with 'y' value (check all rows and combine)
+        param_map = {
+            'raw_chlorophyll': 'chlorophyll',
+            'raw_conductivity': 'conductivity',
+            'raw_depth': 'depth',
+            'raw_do': 'do',
+            'raw_do_pct': 'do_pct',
+            'raw_h2otemp': 'h2otemp',
+            'raw_orp': 'orp',
+            'raw_ph': 'ph',
+            'raw_pressure': 'pressure',
+            'raw_qvalue': 'qvalue',
+            'raw_salinity': 'salinity',
+            'raw_turbidity': 'turbidity'
+        }
+        
+        parameters = []
+        available_dates = []
+        
+        if len(df) > 0:
+            # Find all parameters that have at least one 'y'
+            for col, param_name in param_map.items():
+                if (df[col] == 'y').any():
+                    parameters.append(param_name)
+            
+            # Find all year/month combinations where at least one parameter has 'y'
+            for _, row in df.iterrows():
+                has_data = False
+                for col in param_map.keys():
+                    if str(row[col]).lower() == 'y':
+                        has_data = True
+                        break
+                
+                if has_data:
+                    available_dates.append({
+                        'year': int(row['year']),
+                        'month': int(row['month'])
+                    })
+        
+        return jsonify({
+            'parameters': parameters,
+            'available_dates': available_dates
+        })
+    except Exception as e:
+        print(f"Error fetching WQ parameters: {str(e)}")
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@data_api.route('/wq/data', methods=['POST'])
+def get_wq_data():
+    """Get water quality data for selected parameters and date range"""
+    try:
+        data = request.get_json()
+        region = data.get('region')
+        siteid = data.get('siteid')
+        startdate = data.get('startdate')
+        enddate = data.get('enddate')
+        parameters = data.get('parameters', [])
+        
+        if not all([region, siteid, startdate, enddate, parameters]):
+            return jsonify({'error': 'All parameters are required'}), 400
+        
+        # Build column list for selected parameters
+        param_columns = []
+        for param in parameters:
+            param_columns.append(f'raw_{param.lower()}')
+        
+        columns_str = ', '.join(param_columns)
+        
+        qry = f"""
+            SELECT 
+                objectid,
+                projectid,
+                siteid,
+                estuaryname,
+                stationno,
+                sensortype,
+                sensorid,
+                samplecollectiontimestamp,
+                {columns_str}
+            FROM vw_logger_raw_publish
+            WHERE siteid = '{siteid}'
+            AND samplecollectiontimestamp BETWEEN '{startdate}' AND '{enddate}'
+            ORDER BY samplecollectiontimestamp
+        """
+        print(qry)
+        df = pd.read_sql(qry, g.eng)
+        print(f"Raw data rows: {len(df)}")
+        
+        # Convert timestamp to date for grouping
+        df['samplecollectiontimestamp'] = pd.to_datetime(df['samplecollectiontimestamp'])
+        df['date'] = df['samplecollectiontimestamp'].dt.date
+        
+        # Group by date and compute daily averages for parameter columns
+        groupby_cols = ['date', 'siteid', 'estuaryname', 'projectid']
+        
+        # Create aggregation dict - average for parameter columns, first for others
+        agg_dict = {}
+        for col in param_columns:
+            agg_dict[col] = 'mean'
+        
+        df_daily = df.groupby(groupby_cols, as_index=False).agg(agg_dict)
+        
+        # Rename date back to samplecollectiontimestamp for frontend compatibility
+        df_daily = df_daily.rename(columns={'date': 'samplecollectiontimestamp'})
+        
+        print(f"Daily averaged rows: {len(df_daily)}")
+        
+        # Replace NaN with None (converts to null in JSON)
+        df_daily = df_daily.where(pd.notna(df_daily), None)
+        # Convert to dict for JSON response
+        result = df_daily.to_dict('records')
+        
+        return jsonify({'data': result})
+    except Exception as e:
+        print(f"Error fetching WQ data: {str(e)}")
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
