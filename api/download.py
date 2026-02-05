@@ -169,6 +169,20 @@ def download_data():
                         # Merge to add fish_or_invert column
                         df = df.merge(lu_df, on='scientificname', how='left')
 
+                # Special handling for Macroalgae: add bin column from percentcovercode lookup
+                if dtype == "SOP 7: Macroalgae" and tbl == 'tbl_macroalgae_floating':
+                    if not df.empty and 'percentcovercode' in df.columns:
+                        # Get estimatedcover from lu_percentcovercode lookup table
+                        lookup_query = "SELECT percentcovercode, estimatedcover FROM lu_percentcovercode"
+                        lu_df = pd.read_sql(lookup_query, eng)
+                        # Rename estimatedcover to bin
+                        lu_df = lu_df.rename(columns={'estimatedcover': 'bin'})
+                        # Convert percentcovercode to string in both dataframes to avoid type mismatch
+                        df['percentcovercode'] = df['percentcovercode'].astype(str)
+                        lu_df['percentcovercode'] = lu_df['percentcovercode'].astype(str)
+                        # Left merge to add bin column
+                        df = df.merge(lu_df, on='percentcovercode', how='left')
+
                 # Write to Excel (if no data, write a placeholder DataFrame)
                 if df.empty:
                     empty_df = pd.DataFrame({'DATA_NOT_AVAILABLE_FOR_CURRENT_SELECTIONS': []})
@@ -188,6 +202,14 @@ def download_data():
                             selected_cols.insert(sci_idx + 1, 'fish_or_invert')
                         else:
                             selected_cols.append('fish_or_invert')
+                    # Add bin if it exists (for Macroalgae floating table)
+                    if 'bin' in df.columns and 'bin' not in selected_cols:
+                        # Insert bin after percentcovercode if possible
+                        if 'percentcovercode' in selected_cols:
+                            pcc_idx = selected_cols.index('percentcovercode')
+                            selected_cols.insert(pcc_idx + 1, 'bin')
+                        else:
+                            selected_cols.append('bin')
                     df = df[selected_cols]
                     projectid_list.extend(set(df['projectid'].tolist()))
 
