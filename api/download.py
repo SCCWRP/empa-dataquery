@@ -183,6 +183,15 @@ def download_data():
                         # Left merge to add bin column
                         df = df.merge(lu_df, on='percentcovercode', how='left')
 
+                # Special handling for Vegetation: add rating column from lu_plantspecies
+                if dtype == "SOP 11: Marsh plain vegetation and epifauna surveys" and tbl == 'tbl_vegetativecover_data':
+                    if not df.empty and 'scientificname' in df.columns:
+                        # Get rating from lu_plantspecies lookup table
+                        lookup_query = "SELECT scientificname, rating FROM lu_plantspecies"
+                        lu_df = pd.read_sql(lookup_query, eng)
+                        # Merge to add rating column
+                        df = df.merge(lu_df, on='scientificname', how='left')
+
                 # Write to Excel (if no data, write a placeholder DataFrame)
                 if df.empty:
                     empty_df = pd.DataFrame({'DATA_NOT_AVAILABLE_FOR_CURRENT_SELECTIONS': []})
@@ -202,6 +211,14 @@ def download_data():
                             selected_cols.insert(sci_idx + 1, 'fish_or_invert')
                         else:
                             selected_cols.append('fish_or_invert')
+                    # Add rating if it exists (for Vegetation tables)
+                    if 'rating' in df.columns and 'rating' not in selected_cols:
+                        # Insert rating after status if possible
+                        if 'status' in selected_cols:
+                            status_idx = selected_cols.index('status')
+                            selected_cols.insert(status_idx + 1, 'rating')
+                        else:
+                            selected_cols.append('rating')
                     # Add bin if it exists (for Macroalgae floating table)
                     if 'bin' in df.columns and 'bin' not in selected_cols:
                         # Insert bin after percentcovercode if possible
