@@ -30,7 +30,7 @@
     "@esri/calcite-components": "^2.9.0",
     "@esri/calcite-components-react": "^2.8.5",
     "@esri/calcite-ui-icons": "^3.28.2",
-    "axios": "^1.7.2",
+    "axios": "^1.15.0",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.5.1",
     "chartjs-adapter-date-fns": "^3.0.0",
