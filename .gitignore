@@ -8,3 +8,4 @@ _*
 dist/config
 api/export/
 permissions.sh
+AGENTS.md

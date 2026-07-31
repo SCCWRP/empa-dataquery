@@ -19,7 +19,7 @@ def populate_dropdown():
     if selected_projectid is None:
         selected_projectid = ','.join(pd.read_sql("SELECT * FROM lu_project", g.eng).projectid.tolist())
     if selected_year is None:
-        selected_year = "2021,2022,2023,2024"
+        selected_year = "2021,2022,2023,2024,2025,2026"
 
 
     query_conditions = []
@@ -65,7 +65,7 @@ def populate_dropdown():
     dtypes = []
     for x in current_app.data_config.get('DATASETS').keys():
         label = current_app.data_config.get('DATASETS').get(x).get('label')
-        if 'logger' not in label and 'toxicity' not in label and 'topography' not in label:
+        if 'logger' not in label and 'toxicity' not in label and 'topography' not in label and 'Sediment accretion' not in label:
             dtypes.append(label) 
 
     # Create and sort the list for 'region'
